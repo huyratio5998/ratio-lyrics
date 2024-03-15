@@ -1,8 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Ratio_Lyrics.Web.Configurations.Mapper;
 using Ratio_Lyrics.Web.Data;
+using Ratio_Lyrics.Web.Models;
 using Ratio_Lyrics.Web.Repositories.Abstracts;
 using Ratio_Lyrics.Web.Repositories.Implements;
+using Ratio_Lyrics.Web.Services.Abstraction;
 using Ratio_Lyrics.Web.Services.Abstractions;
 using Ratio_Lyrics.Web.Services.Implements;
 
@@ -17,7 +20,11 @@ namespace Ratio_Lyrics.Web.DependencyInjection
 
         public static IServiceCollection AddFluentValidationConfig(this IServiceCollection services)
         {
-            //return services.AddValidatorsFromAssemblyContaining<ProductViewModelValidator>();
+            services.AddValidatorsFromAssemblyContaining<ArtistViewModelValidator>();
+            services.AddValidatorsFromAssemblyContaining<MediaPlatformViewModelValidator>();
+            services.AddValidatorsFromAssemblyContaining<SongMediaPlatformViewModelValidator>();
+            services.AddValidatorsFromAssemblyContaining<SongViewModelValidator>();
+
             return services;
         }
 
@@ -26,6 +33,9 @@ namespace Ratio_Lyrics.Web.DependencyInjection
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<ICommonService, CommonService>();
 
+            services.AddScoped<IArtistService, ArtistService>();
+            services.AddScoped<IMediaPlatformService, MediaPlatformService>();
+            services.AddScoped<ISongService, SongService>();            
 
             return services;
         }

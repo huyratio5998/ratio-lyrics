@@ -1,8 +1,47 @@
-﻿@{
+﻿@model SongViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
+@if(Model == null)
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+        <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+        <p>No Songs</p>
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+        <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    </div>
+    <div>
+        <h2>@Model.DisplayName</h2>
+        <div>
+            <img src="@Model.ImageUrl" alt="@Model.DisplayName" style="height:300px;width:auto" />
+        </div>        
+        
+        @if(Model.Artists != null && Model.Artists.Any())
+        {
+            <h3>Artist:</h3>
+            <p><i>@string.Join(", ", Model.Artists.ToList())</i></p>            
+        }
+        <h3>Media Links:</h3>
+        @if(Model.MediaPlatformLinks != null && Model.MediaPlatformLinks.Any())
+        {
+            <ul>
+                @foreach(var item in Model.MediaPlatformLinks)
+                {
+                    <li><a href="@item.Link" target="_blank">@item.Name</a></li>
+                }
+            </ul>            
+        }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+        <div>
+            <h3>Lyrics:</h3>
+            <div>@Model.Lyric</div>
+        </div>        
+    </div>
+}
+
