@@ -1,0 +1,121 @@
+﻿@model SongViewModel
+
+@{
+    ViewData["Title"] = "Song Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Song</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DisplayName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DisplayName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Image)
+        </dt>
+        <dd class="col-sm-10">
+            @if (string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="/images/songs/no-song.png" style="height:250px;width:auto" alt="@Model.Name" />
+            }
+            else
+            {
+                <img src="@Model.ImageUrl" style="height:250px;width:auto" alt="@Model.Name" class="js_img_changeTarget" />
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Background)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Background)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ReleaseDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Model.ReleaseDate.ToString("dd/MM/yyyy")
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.SearchKey)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.SearchKey)
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Views)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Views)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Lyric)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Lyric)
+        </dd>
+        @if (Model.MediaPlatformLinks != null && Model.MediaPlatformLinks.Any())
+        {
+            <dt class="col-sm-2">
+                Media Links
+            </dt>
+            <dd class="col-sm-10">
+                <div>
+                    @foreach (var item in Model.MediaPlatformLinks)
+                    {
+                        <a href="@item.Link" target="_blank">@item.Name</a>
+
+                        <span> | </span>
+                    }
+                </div>
+            </dd>
+        }
+
+        @if (Model.Artists != null && Model.Artists.Any())
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Artists)
+            </dt>
+            <dd class="col-sm-10">
+                @string.Join(", ", Model.Artists.Select(x => x.Name))
+            </dd>
+        }
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CreatedDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CreatedDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ModifiedDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ModifiedDate)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

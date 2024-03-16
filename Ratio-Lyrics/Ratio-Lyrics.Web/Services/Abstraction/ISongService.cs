@@ -9,5 +9,7 @@ namespace Ratio_Lyrics.Web.Services.Abstraction
         public Task<SongViewModel?> GetSongAsync(int songId, bool isTracking = true);
         public Task<PagedResponse<SongViewModel>> GetSongsAsync(BaseQueryParams queryParams);
         public Task<bool> UpdateSongAsync(SongViewModel newSong);
+        public Task<SongViewsResponseViewModel> UpdateViewsAsync(int songId);
+        public Task<bool> DeleteSongAsync(int id);
     }
 }

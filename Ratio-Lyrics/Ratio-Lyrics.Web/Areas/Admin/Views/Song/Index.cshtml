@@ -1,9 +1,103 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+﻿@using Ratio_Lyrics.Web.Areas.Admin.Models
+@model ListSongsAdminViewModel
+
+@{
+    ViewData["Title"] = "Song Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";       
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome Admin</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">Admin Web apps with ASP.NET Core</a>.</p>
+<h1>Song Management</h1>
+
+<p>
+    <span>
+        <button type="button" class="btn btn-primary"><a asp-action="Create">Create Song</a></button>
+    </span>    
+    <span>
+        <form asp-action="Index">
+            <div class="form-control">
+                <label for="name">Name:</label>
+                <input type="text" name="name" id="name" value="@Model.SearchText" />                            
+                
+                <input type="hidden" name="page" value="1" />
+                <input type="submit" value="Filter" />
+            </div>
+        </form>
+    </span>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Release
+                </th>
+                <th>
+                    Views
+                </th>
+                <th>
+                    Artist
+                </th>
+                <th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model.Items != null && Model.Items.Any())
+            {
+                @foreach (var item in Model.Items)
+                {
+                    var artist = item.Artists != null && item.Artists.Any() ? string.Join(", ", item.Artists.Select(x => x.Name)) : "";
+                    <tr>
+                        @if (string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <td>
+                                <img src="/images/songs/no-song.png" style="height:150px;width:auto" alt="@item.Name">
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <img src="@item.ImageUrl" style="height:150px;width:auto" alt="@item.Name">
+                            </td>
+                        }
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.Id">
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </a>
+                        </td>
+                        <td>
+                            @item.ReleaseDate.ToString("dd/MM/yyyy")
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Views)
+                        </td>
+                        <td>
+                            @artist
+                        </td>
+                        <td>
+                            <div class="row col-12">
+                                <div class="col-6" style="width:60px">
+                                    <a asp-action="Edit" class="btn btn-outline-secondary" asp-route-id="@item.Id">Edit</a>
+                                </div>
+                                <div class="col-6" style="width:60px">
+                                    <form asp-action="DeleteConfirmed">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <input type="submit" value="Delete" class="btn btn-outline-danger" />
+                                    </form>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
 </div>
+
+<partial name="_AdminGridPaging" model="Model" />

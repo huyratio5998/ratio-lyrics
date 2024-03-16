@@ -18,6 +18,12 @@ namespace Ratio_Lyrics.Web.Models
         public DateTime ReleaseDate { get; set; }
         public string? SearchKey { get; set; }
 
+        //Form create
+        public string? YoutubeLink { get; set; }
+        public string? SpotifyLink { get; set; }
+        public string? AppleMusicLink { get; set; }
+        public string? MediaLinksForm { get; set; }
+        public string? ArtistForm { get; set; }
         //Lyrics
         public string Lyric { get; set; }
         public decimal Views { get; set; }

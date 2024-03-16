@@ -3,7 +3,7 @@
     public class BaseQueryParams
     {
         public string? SearchText { get; set; } = string.Empty;
-        public OrderType? OrderBy { get; set; }
+        public OrderType? OrderBy { get; set; } = OrderType.Asc;
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
     }

@@ -162,7 +162,9 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 .GetAll(isTracking).AsQueryable()
                 .Include(x => x.Lyric)
                 .Include(x => x.MediaPlatformLinks)
+                .ThenInclude(song => song.MediaPlatform)
                 .Include(x => x.SongArtists)
+                .ThenInclude(song =>song.Artist)
                 .FirstOrDefaultAsync(x => x.Id == songId);
 
             if (song == null || song.Id == 0) return null;
@@ -321,6 +323,29 @@ namespace Ratio_Lyrics.Web.Services.Implements
 
             await AddMediaPlatformLinks(newSong);
             _logger.LogInformation($"Update media platform link");
+        }
+
+        public async Task<SongViewsResponseViewModel> UpdateViewsAsync(int songId)
+        {
+            var songLyric = await _unitOfWork.GetRepository<SongLyric>()
+                .GetAll(true).AsQueryable()
+                .FirstOrDefaultAsync(x => x.SongId == songId);
+            if (songLyric == null)
+                return new SongViewsResponseViewModel(false, 0);
+
+            songLyric.Views++;
+            await _unitOfWork.SaveAsync();
+
+            return new SongViewsResponseViewModel(true, songLyric.Views);
+        }
+
+        public async Task<bool> DeleteSongAsync(int id)
+        {
+            var result = await _songRepository.DeleteAsync(id);
+            if (!result) return false;
+
+            await _unitOfWork.SaveAsync();
+            return true;
         }
     }
 }

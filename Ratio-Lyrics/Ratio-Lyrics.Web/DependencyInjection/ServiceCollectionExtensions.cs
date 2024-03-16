@@ -8,6 +8,7 @@ using Ratio_Lyrics.Web.Repositories.Implements;
 using Ratio_Lyrics.Web.Services.Abstraction;
 using Ratio_Lyrics.Web.Services.Abstractions;
 using Ratio_Lyrics.Web.Services.Implements;
+using Serilog;
 
 namespace Ratio_Lyrics.Web.DependencyInjection
 {
@@ -36,6 +37,7 @@ namespace Ratio_Lyrics.Web.DependencyInjection
             services.AddScoped<IArtistService, ArtistService>();
             services.AddScoped<IMediaPlatformService, MediaPlatformService>();
             services.AddScoped<ISongService, SongService>();            
+            services.AddScoped<ISiteSettingService, SiteSettingService>();
 
             return services;
         }
@@ -48,7 +50,7 @@ namespace Ratio_Lyrics.Web.DependencyInjection
             return services;
         }
 
-        public static void AddPaymentDemoDBContext(this IServiceCollection services, IConfiguration configuration)
+        public static void AddRatioLyricsDBContext(this IServiceCollection services, IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -72,6 +74,17 @@ namespace Ratio_Lyrics.Web.DependencyInjection
             //});
 
             return services;
+        }
+
+        public static WebApplicationBuilder AddSerilogConfig(this WebApplicationBuilder builder)
+        {
+            var seriLogConfig = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .Enrich.FromLogContext()
+                .CreateLogger();
+            builder.Logging.ClearProviders();
+            builder.Logging.AddSerilog(seriLogConfig);
+            return builder;
         }
     }
 }

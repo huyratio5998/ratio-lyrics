@@ -12,8 +12,8 @@ using Ratio_Lyrics.Web.Data;
 namespace Ratio_Lyrics.Web.Data.Migrations
 {
     [DbContext(typeof(RatioLyricsDBContext))]
-    [Migration("20240314175231_init db")]
-    partial class initdb
+    [Migration("20240316125723_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -280,6 +280,32 @@ namespace Ratio_Lyrics.Web.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MediaPlatforms");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Image = "/images/logos/spotify.png",
+                            ModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Spotify"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Image = "/images/logos/youtube.png",
+                            ModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Youtube"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Image = "/images/logos/apple-music.png",
+                            ModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Apple Music"
+                        });
                 });
 
             modelBuilder.Entity("Ratio_Lyrics.Web.Entities.SiteSetting", b =>
@@ -361,11 +387,8 @@ namespace Ratio_Lyrics.Web.Data.Migrations
 
             modelBuilder.Entity("Ratio_Lyrics.Web.Entities.SongArtist", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("SongId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArtistId")
                         .HasColumnType("int");
@@ -373,17 +396,15 @@ namespace Ratio_Lyrics.Web.Data.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("SongId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("SongId", "ArtistId");
 
                     b.HasIndex("ArtistId");
-
-                    b.HasIndex("SongId");
 
                     b.ToTable("SongArtists");
                 });
@@ -422,33 +443,28 @@ namespace Ratio_Lyrics.Web.Data.Migrations
 
             modelBuilder.Entity("Ratio_Lyrics.Web.Entities.SongMediaPlatform", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("SongId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("MediaPlatformId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
 
                     b.Property<string>("Link")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MediaPlatformId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("SongId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("SongId", "MediaPlatformId");
 
                     b.HasIndex("MediaPlatformId");
-
-                    b.HasIndex("SongId");
 
                     b.ToTable("SongMediaPlatforms");
                 });

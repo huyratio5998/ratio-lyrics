@@ -1,0 +1,6 @@
+@Ratio_Lyrics.Api_HostAddress = http://localhost:5007
+
+GET {{Ratio_Lyrics.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
