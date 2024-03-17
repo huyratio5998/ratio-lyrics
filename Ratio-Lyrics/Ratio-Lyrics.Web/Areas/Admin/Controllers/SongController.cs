@@ -23,6 +23,15 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
             _mediaPlatformService = mediaPlatformService;
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SongFilter(string? name, int? page = 1)
+        {            
+            if (page <= 1) page = 1;
+
+            return RedirectToAction(nameof(Index), new { searchText = name, PageNumber = page });
+        }
+
         public async Task<IActionResult> Index(BaseQueryParams args)
         {
             args.PageSize = pageSizeDefault;
@@ -39,7 +48,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
         {
             if (id == 0) return NotFound();
 
-            var song = await _songService.GetSongAsync(id);
+            var song = await _songService.GetSongAsync(id, false);
             if (song == null) return NotFound();
 
             return View(song);
@@ -84,7 +93,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
             var songId = await _songService.CreateSongAsync(newSong);
             if (songId != 0) return RedirectToAction(nameof(Index));
 
-            return View();
+            return RedirectToAction(nameof(Create));
         }
 
         public async Task<IActionResult> Edit(int id)
@@ -140,13 +149,13 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
             if (!result) return View(model);
 
             return RedirectToAction(nameof(Index));
-        }
+        }               
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var SiteSetting = _songService.DeleteSongAsync(id);
+            var song = await _songService.DeleteSongAsync(id);
             return RedirectToAction(nameof(Index));
         }
     }

@@ -28,7 +28,7 @@ namespace Ratio_Lyrics.Web.Controllers
         {
             if(string.IsNullOrEmpty(text)) return View();
 
-            var song = await _songService.GetSongAsync(text);
+            var song = await _songService.GetSongAsync(text, false);
             return View(song);
         }
 

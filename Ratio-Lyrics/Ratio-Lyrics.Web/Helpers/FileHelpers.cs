@@ -72,7 +72,7 @@
         public static string ResolveImage(string baseUrl, string image)
         {
             if (string.IsNullOrWhiteSpace(image)) return string.Empty;
-            return $"{baseUrl}/{image.Trim()}";
+            return $"/{baseUrl}/{image.Trim()}";
         }
     }
 }

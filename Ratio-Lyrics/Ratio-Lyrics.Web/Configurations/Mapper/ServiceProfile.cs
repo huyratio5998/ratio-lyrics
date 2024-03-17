@@ -23,10 +23,14 @@ namespace Ratio_Lyrics.Web.Configurations.Mapper
             //media platform
             CreateMap<MediaPlatform, MediaPlatformViewModel>();
             CreateMap<MediaPlatformViewModel, MediaPlatform>();
-            CreateMap<SongMediaPlatform, SongMediaPlatformViewModel>();
-            CreateMap<SongMediaPlatformViewModel, SongMediaPlatform>();
-            CreateMap<MediaPlatformViewModel, SongMediaPlatformViewModel>();
-            CreateMap<SongMediaPlatformViewModel, MediaPlatformViewModel>();
+            CreateMap<SongMediaPlatform, SongMediaPlatformViewModel>()
+                .ForMember(x => x.MediaPlatformId, y => y.MapFrom(t => t.MediaPlatform.Id))
+                .ForMember(x => x.Name, y => y.MapFrom(t => t.MediaPlatform.Name));
+            CreateMap<SongMediaPlatformViewModel, SongMediaPlatform>();                
+            CreateMap<MediaPlatformViewModel, SongMediaPlatformViewModel>()
+                .ForMember(x => x.MediaPlatformId, y => y.MapFrom(t => t.Id));
+            CreateMap<SongMediaPlatformViewModel, MediaPlatformViewModel>()
+                .ForMember(x => x.Id, y => y.MapFrom(t => t.MediaPlatformId));
 
             //song
             CreateMap<Song, SongViewModel>()
@@ -37,7 +41,9 @@ namespace Ratio_Lyrics.Web.Configurations.Mapper
                 .ForMember(x => x.Image, y => y.Ignore()); ;            
             CreateMap<SongViewModel, Song>()
                 .ForMember(x=>x.Image, y=>y.MapFrom(t=>t.ImageUrl))
-                .ForMember(x=>x.Lyric, y=>y.Ignore());
+                .ForMember(x=>x.Lyric, y=>y.Ignore())
+                .ForMember(x => x.SongArtists, y => y.Ignore())
+                .ForMember(x => x.MediaPlatformLinks, y => y.Ignore());
 
             CreateMap(typeof(PagedResponse<>), typeof(PagedResponse<>));
 

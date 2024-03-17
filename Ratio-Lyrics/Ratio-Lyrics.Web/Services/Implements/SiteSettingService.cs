@@ -43,7 +43,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
         public async Task<SiteSettingViewModel?> Get(int id, bool isTracking = true)
         {
             if (id == 0) return null;
-            var setting = await _siteSettingRepository.GetByIdAsync(id);
+            var setting = await _siteSettingRepository.GetByIdAsync(id, isTracking);
             if (setting == null) return null;
 
             return _mapper.Map<SiteSettingViewModel>(setting);
@@ -51,7 +51,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
 
         public async Task<List<SiteSettingViewModel>> Gets()
         {
-            var results = await Task.Run(() => _siteSettingRepository.GetAll().ToList());
+            var results = await Task.Run(() => _siteSettingRepository.GetAll(false).ToList());
             return _mapper.Map<List<SiteSettingViewModel>>(results);
         }
 

@@ -54,8 +54,13 @@ namespace Ratio_Lyrics.Web.DependencyInjection
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-            services.AddDbContext<RatioLyricsDBContext>(opt => opt.UseSqlServer(connectionString,
-                builder => builder.MigrationsAssembly(typeof(RatioLyricsDBContext).Assembly.FullName)));
+            services.AddDbContext<RatioLyricsDBContext>(opt =>
+            {
+                opt.UseSqlServer(connectionString,
+                    builder => builder.MigrationsAssembly(typeof(RatioLyricsDBContext).Assembly.FullName));
+
+                opt.EnableSensitiveDataLogging();
+            });
 
             services.AddDatabaseDeveloperPageExceptionFilter();
         }

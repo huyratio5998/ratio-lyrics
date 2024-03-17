@@ -28,7 +28,7 @@ namespace Ratio_Lyrics.Api.Controllers.V1
         {
             if (string.IsNullOrWhiteSpace(name)) return BadRequest();
 
-            var song = await _songService.GetSongAsync(name);
+            var song = await _songService.GetSongAsync(name, false);
             if (song == null) return NotFound();
 
             return Ok(song);

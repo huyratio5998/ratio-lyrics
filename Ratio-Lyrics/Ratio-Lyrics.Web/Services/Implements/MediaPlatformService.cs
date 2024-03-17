@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using Ratio_Lyrics.Web.Entities;
 using Ratio_Lyrics.Web.Models;
 using Ratio_Lyrics.Web.Repositories.Abstracts;
@@ -26,7 +27,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
         {
             if (mediaPlatformId == 0) return null;
 
-            var mediaPlatform = await _mediaPlatformRepository.GetByIdAsync(mediaPlatformId);
+            var mediaPlatform = await _mediaPlatformRepository.GetByIdAsync(mediaPlatformId, isTracking);
             if (mediaPlatform == null) return null;
 
             return _mapper.Map<MediaPlatformViewModel>(mediaPlatform);
@@ -58,6 +59,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             var result = await _mediaPlatformRepository.CreateAsync(_mapper.Map<MediaPlatform>(newMediaPlatform));
             if (result == null || result.Id == 0) return 0;
 
+            await _unitOfWork.SaveAsync();
             return result.Id;
         }
 
@@ -67,12 +69,19 @@ namespace Ratio_Lyrics.Web.Services.Implements
             if (!validateResult.IsValid) return false;
 
             var result = _mediaPlatformRepository.Update(_mapper.Map<MediaPlatform>(newMediaPlatform));
+            if (!result) return false;
+
+            await _unitOfWork.SaveAsync();
             return result;
         }
 
         public async Task<bool> DeleteMediaPlatformAsync(int MediaPlatformId)
         {
-            return await _mediaPlatformRepository.DeleteAsync(MediaPlatformId);
+            var result = await _mediaPlatformRepository.DeleteAsync(MediaPlatformId);
+            if (!result) return false;
+
+            await _unitOfWork.SaveAsync();
+            return result;
         }       
     }
 }
