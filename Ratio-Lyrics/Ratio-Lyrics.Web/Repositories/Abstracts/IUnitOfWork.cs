@@ -6,6 +6,7 @@ namespace Ratio_Lyrics.Web.Repositories.Abstracts
     {
         Task CreateTransactionAsync();
         Task SaveAsync();
+        Task SaveAsync(CancellationToken token);
         Task CommitAsync();
         Task RollbackAsync();
 

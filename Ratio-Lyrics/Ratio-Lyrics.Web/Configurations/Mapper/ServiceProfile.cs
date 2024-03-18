@@ -25,7 +25,8 @@ namespace Ratio_Lyrics.Web.Configurations.Mapper
             CreateMap<MediaPlatformViewModel, MediaPlatform>();
             CreateMap<SongMediaPlatform, SongMediaPlatformViewModel>()
                 .ForMember(x => x.MediaPlatformId, y => y.MapFrom(t => t.MediaPlatform.Id))
-                .ForMember(x => x.Name, y => y.MapFrom(t => t.MediaPlatform.Name));
+                .ForMember(x => x.Name, y => y.MapFrom(t => t.MediaPlatform.Name))
+                .ForMember(x => x.Image, y => y.MapFrom(t => t.MediaPlatform.Image));
             CreateMap<SongMediaPlatformViewModel, SongMediaPlatform>();                
             CreateMap<MediaPlatformViewModel, SongMediaPlatformViewModel>()
                 .ForMember(x => x.MediaPlatformId, y => y.MapFrom(t => t.Id));

@@ -1,7 +1,7 @@
 ﻿@using Ratio_Lyrics.Web.Areas.Admin.Models
 @model BaseAdminPagingViewModel
 
-@if (Model == null || Model.TotalPage <= 1) return;
+@if (Model == null || Model.TotalPages <= 1) return;
 
 @{
     // params pass
@@ -14,7 +14,7 @@
 
     // setting UI
     var disablePrevious = Model.PageIndex == 1 ? "disabled" : "";
-    var disableNext = Model.PageIndex == Model.TotalPage ? "disabled" : "";
+    var disableNext = Model.PageIndex == Model.TotalPages ? "disabled" : "";
 
     int maxContinuesPage = 10;
     int stepEachGap = 2;
@@ -34,14 +34,14 @@
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
-        @for (var i = 1; i <= Model.TotalPage; i++)
+        @for (var i = 1; i <= Model.TotalPages; i++)
         {
             if (i == 1) parms.Remove("page");
             else parms["page"] = i.ToString();
 
-            if (Model.TotalPage > maxContinuesPage)
+            if (Model.TotalPages > maxContinuesPage)
             {
-                if (i > 1 && i < Model.TotalPage)
+                if (i > 1 && i < Model.TotalPages)
                 {
                     if (!generateDotBefore && i < Model.PageIndex - 2)
                     {
@@ -50,13 +50,13 @@
                             <a class="page-link">...</a>
                         </li>
                     }
-                    else if ((Model.PageIndex - stepEachGap <= i && i <= Model.PageIndex + stepEachGap) || (Model.PageIndex + 2 < rangeLimit && i <= rangeLimit) || (Model.PageIndex - 2 > Model.TotalPage - rangeLimit && i > Model.TotalPage - rangeLimit))
+                    else if ((Model.PageIndex - stepEachGap <= i && i <= Model.PageIndex + stepEachGap) || (Model.PageIndex + 2 < rangeLimit && i <= rangeLimit) || (Model.PageIndex - 2 > Model.TotalPages - rangeLimit && i > Model.TotalPages - rangeLimit))
                     {
                         <li class="page-item @(i == Model.PageIndex ? "active" : "")">
                             <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link">@i</a>
                         </li>
                     }
-                    else if (!generateDotAfter && Model.PageIndex + 2 < i && i < Model.TotalPage - 1)
+                    else if (!generateDotAfter && Model.PageIndex + 2 < i && i < Model.TotalPages - 1)
                     {
                         generateDotAfter = true;
                         <li class="page-item">

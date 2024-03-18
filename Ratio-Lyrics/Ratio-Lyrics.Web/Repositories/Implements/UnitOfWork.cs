@@ -28,6 +28,11 @@ namespace Ratio_Lyrics.Web.Repositories.Implements
             await _context.SaveChangesAsync();
         }
 
+        public async Task SaveAsync(CancellationToken token)
+        {
+            await _context.SaveChangesAsync(token);
+        }
+
         public async Task CommitAsync()
         {
             try

@@ -16,14 +16,7 @@ namespace Ratio_Lyrics.Web.Controllers
             _songService = songService;
         }
 
-        //public async Task<IActionResult> Index(int id)
-        //{
-        //    if (id == 0) return View();
-
-        //    var song = await _songService.GetSongAsync(id);
-        //    return View(song);
-        //}
-
+        [HttpGet]
         public async Task<IActionResult> Index(string text)
         {
             if(string.IsNullOrEmpty(text)) return View();

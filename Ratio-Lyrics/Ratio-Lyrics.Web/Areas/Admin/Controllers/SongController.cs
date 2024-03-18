@@ -13,8 +13,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ISongService _songService;
-        private readonly IMediaPlatformService _mediaPlatformService;
-        private const int pageSizeDefault = 10;
+        private readonly IMediaPlatformService _mediaPlatformService;        
 
         public SongController(IMapper mapper, ISongService songService,IMediaPlatformService mediaPlatformService)
         {
@@ -29,13 +28,16 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
         {            
             if (page <= 1) page = 1;
 
-            return RedirectToAction(nameof(Index), new { searchText = name, PageNumber = page });
+            return RedirectToAction(nameof(Index), new { searchText = name, page = page });
         }
 
         public async Task<IActionResult> Index(BaseQueryParams args)
         {
-            args.PageSize = pageSizeDefault;
+            if (args.PageSize == 0) args.PageSize = CommonConstant.PageSizeDefault;
             var songs = _mapper.Map<ListSongsAdminViewModel>(await _songService.GetSongsAsync(args));
+            songs.PageSize = args.PageSize;
+            songs.SearchText = args.SearchText;
+            songs.PageIndex = args.PageNumber;
 
             ViewBag.Area = "Admin";
             ViewBag.Controller = "Song";
@@ -76,9 +78,9 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
             {
                 foreach (var item in newSong.MediaPlatformLinks)
                 {
-                    if (item.Name.Equals(Constants.CommonConstant.Spotify)) item.Link = newSong.SpotifyLink;
-                    else if (item.Name.Equals(Constants.CommonConstant.Youtube)) item.Link = newSong.YoutubeLink;
-                    else if (item.Name.Equals(Constants.CommonConstant.AppleMusic)) item.Link = newSong.AppleMusicLink;
+                    if (item.Name.Equals(Constants.CommonConstant.Spotify)) item.Link = newSong.SpotifyLink ?? string.Empty;
+                    else if (item.Name.Equals(Constants.CommonConstant.Youtube)) item.Link = newSong.YoutubeLink ?? string.Empty;
+                    else if (item.Name.Equals(Constants.CommonConstant.AppleMusic)) item.Link = newSong.AppleMusicLink ?? string.Empty;
                 }
             }
 
@@ -131,9 +133,9 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
             {
                 foreach (var item in model.MediaPlatformLinks)
                 {
-                    if (item.Name.Equals(Constants.CommonConstant.Spotify)) item.Link = model.SpotifyLink;
-                    else if (item.Name.Equals(Constants.CommonConstant.Youtube)) item.Link = model.YoutubeLink;
-                    else if (item.Name.Equals(Constants.CommonConstant.AppleMusic)) item.Link = model.AppleMusicLink;
+                    if (item.Name.Equals(Constants.CommonConstant.Spotify)) item.Link = model.SpotifyLink ?? string.Empty;
+                    else if (item.Name.Equals(Constants.CommonConstant.Youtube)) item.Link = model.YoutubeLink ?? string.Empty;
+                    else if (item.Name.Equals(Constants.CommonConstant.AppleMusic)) item.Link = model.AppleMusicLink ?? string.Empty;
                 }
             }
 

@@ -33,6 +33,7 @@ namespace Ratio_Lyrics.Web.DependencyInjection
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<ICommonService, CommonService>();
+            //services.AddHostedService<RunUpdateViewsBackgroundTask>();
 
             services.AddScoped<IArtistService, ArtistService>();
             services.AddScoped<IMediaPlatformService, MediaPlatformService>();

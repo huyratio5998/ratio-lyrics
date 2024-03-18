@@ -3,16 +3,16 @@
 
 @{
     ViewData["Title"] = "Update Song";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";        
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 <h1>Update</h1>
 
 <h4>Song</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <form asp-action="Edit" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="col-md-4">
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
@@ -43,7 +43,7 @@
 
                 <input type="file" asp-for="Image" class="form-control js_img_changeEvent" />
                 <span asp-validation-for="Image" class="text-danger"></span>
-            </div>            
+            </div>
             <div class="form-group">
                 <label asp-for="Background" class="control-label"></label>
                 <input asp-for="Background" class="form-control" />
@@ -81,25 +81,24 @@
                 <input asp-for="ArtistForm" class="form-control" />
                 <span asp-validation-for="ArtistForm" class="text-danger"></span>
             </div>
+        </div>
+        <div class="form-group col-md-8">
+            <label asp-for="Lyric" class="control-label"></label>
+            <textarea asp-for="Lyric" class="form-control"></textarea>
+            <span asp-validation-for="Lyric" class="text-danger"></span>
+        </div>
 
-            <div class="form-group">
-                <label asp-for="Lyric" class="control-label"></label>
-                <textarea asp-for="Lyric" class="form-control"></textarea>
-                <span asp-validation-for="Lyric" class="text-danger"></span>
-            </div>
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="CreatedDate" />
+        <input type="hidden" asp-for="ModifiedDate" />
+        <input type="hidden" asp-for="ImageUrl" />
+        <input type="hidden" asp-for="Views" />
+        <input type="hidden" asp-for="MediaLinksForm" value="@JsonSerializer.Serialize(Model.MediaPlatformLinks)" />
 
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="CreatedDate" />
-            <input type="hidden" asp-for="ModifiedDate" />
-            <input type="hidden" asp-for="ImageUrl" />
-            <input type="hidden" asp-for="Views" />
-            <input type="hidden" asp-for="MediaLinksForm" value="@JsonSerializer.Serialize(Model.MediaPlatformLinks)" />
-            
-            <div class="form-group">
-                <input type="submit" value="Edit" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+        <div class="form-group col-md-4">
+            <input type="submit" value="Edit" class="btn btn-primary" />
+        </div>
+    </form>
 </div>
 
 <div>

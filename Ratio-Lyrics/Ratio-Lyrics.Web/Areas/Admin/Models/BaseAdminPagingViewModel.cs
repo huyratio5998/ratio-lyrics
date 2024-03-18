@@ -8,8 +8,8 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Models
         public OrderType? OrderBy { get; set; } = OrderType.Asc;
         public int PageIndex { get; set; }
         public int PageSize { get; set; }
-        public int TotalCount { get; set; }
-        public int TotalPage { get; set; }
+        public int TotalRecords { get; set; }
+        public int TotalPages { get; set; }
         public bool IsSelectPreviousItems { get; set; }
     }
 

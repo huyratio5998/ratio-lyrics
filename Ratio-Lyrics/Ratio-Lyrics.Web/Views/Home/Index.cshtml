@@ -1,22 +1,27 @@
-﻿@model SongViewModel
+﻿@inject IConfiguration Configuration
+@model SongViewModel
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home Page";    
+    var publicApiHost = Configuration["PublicApiUrl"].ToString() ?? "https://localhost:7186/";
 }
+<input type="hidden" value="@publicApiHost" id="public-api-host" />
 @if(Model == null)
 {
-    <div class="text-center">
-        <h1 class="display-4">Welcome</h1>
-        <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-        <p>No Songs</p>
+    <div class="form-group row">
+        <h1 class="display-4 text-center">Songs </h1>
+        <input type="text" id="input-search-songs" class="form-control col-6" />
     </div>
+    <div id="searchResultDemoArea"></div>
+    <div id="songDetailArea"></div>
 }
 else
 {
-    <div class="text-center">
-        <h1 class="display-4">Welcome</h1>
-        <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <div class="form-group row">
+        <h1 class="display-4 text-center">Songs </h1>
+        <input type="text" id="input-search-songs" class="form-control col-6" />
     </div>
-    <div>
+    <div id="searchResultDemoArea"></div>
+    <div id="songDetailArea">
         <h2>@Model.DisplayName</h2>
         <div>
             <img src="@Model.ImageUrl" alt="@Model.DisplayName" style="height:300px;width:auto" />
@@ -25,7 +30,7 @@ else
         @if(Model.Artists != null && Model.Artists.Any())
         {
             <h3>Artist:</h3>
-            <p><i>@string.Join(", ", Model.Artists.ToList())</i></p>            
+            <p><i>@string.Join(", ", Model.Artists.Select(x=>x.Name))</i></p>            
         }
         <h3>Media Links:</h3>
         @if(Model.MediaPlatformLinks != null && Model.MediaPlatformLinks.Any())
@@ -33,6 +38,7 @@ else
             <ul>
                 @foreach(var item in Model.MediaPlatformLinks)
                 {
+                    if (string.IsNullOrEmpty(item.Link)) continue;
                     <li><a href="@item.Link" target="_blank">@item.Name</a></li>
                 }
             </ul>            
@@ -40,8 +46,9 @@ else
 
         <div>
             <h3>Lyrics:</h3>
-            <div>@Model.Lyric</div>
+            <div>@Html.Raw(Model.Lyric)</div>
         </div>        
     </div>
 }
 
+<script type="module" defer src="@Url.Content("~/js/home.js")"></script>

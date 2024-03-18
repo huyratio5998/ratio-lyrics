@@ -1,16 +1,17 @@
 ﻿@using Ratio_Lyrics.Web.Areas.Admin.Models
+@using Ratio_Lyrics.Web.Helpers
 @model ListSongsAdminViewModel
 
 @{
     ViewData["Title"] = "Song Management";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";       
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";           
 }
 
 <h1>Song Management</h1>
 
 <p>
     <span>
-        <button type="button" class="btn btn-primary"><a asp-action="Create">Create Song</a></button>
+        <a asp-action="Create" class="btn btn-primary">Create Song</a>
     </span>    
     <span>
         <form asp-action="SongFilter">
@@ -53,6 +54,7 @@
                 @foreach (var item in Model.Items)
                 {
                     var artist = item.Artists != null && item.Artists.Any() ? string.Join(", ", item.Artists.Select(x => x.Name)) : "";
+                    var viewNumber = StringHelper.FormatViews((int)(item.Views));
                     <tr>
                         @if (string.IsNullOrEmpty(item.ImageUrl))
                         {
@@ -63,7 +65,7 @@
                         else
                         {
                             <td>
-                                <img src="@item.ImageUrl" style="height:150px;width:auto" alt="@item.Name">
+                                <img src="@item.ImageUrl" style="height:150px;width:266px" alt="@item.Name">
                             </td>
                         }
                         <td>
@@ -75,7 +77,7 @@
                             @item.ReleaseDate.ToString("dd/MM/yyyy")
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.Views)
+                            @viewNumber
                         </td>
                         <td>
                             @artist
