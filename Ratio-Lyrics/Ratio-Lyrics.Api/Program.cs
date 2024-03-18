@@ -26,6 +26,16 @@ builder.Services.AddApplicationRepositoriesConfig();
 builder.Services.AddApplicationServicesConfig();
 builder.Services.AddHttpClientFactoryConfig();
 
+//enable cors
+builder.Services.AddCors(setup =>
+{
+    setup.AddDefaultPolicy(policyBuilder =>
+    {
+        policyBuilder.WithOrigins("https://localhost:7206")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+    });
+});
 //Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -69,7 +79,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
