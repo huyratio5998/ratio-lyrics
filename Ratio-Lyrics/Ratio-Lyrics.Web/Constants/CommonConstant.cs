@@ -6,5 +6,8 @@
         public static string AppleMusic = "Apple Music";
         public static string Youtube = "Youtube";
         public static string Spotify = "Spotify";
+
+        public static TimeSpan SlidingCacheExpireDefault = TimeSpan.FromMinutes(2);
+        public static DateTimeOffset AbsoluteExpirationDefault = DateTime.Now.AddMinutes(5);
     }
 }

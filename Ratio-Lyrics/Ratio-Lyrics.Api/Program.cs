@@ -31,7 +31,7 @@ builder.Services.AddCors(setup =>
 {
     setup.AddDefaultPolicy(policyBuilder =>
     {
-        policyBuilder.WithOrigins("https://localhost:7206")
+        policyBuilder.WithOrigins(builder.Configuration["AllowCorsCall"] ?? "https://localhost:7206")
                         .AllowAnyHeader()
                         .AllowAnyMethod();
     });

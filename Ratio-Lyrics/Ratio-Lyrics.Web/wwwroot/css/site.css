@@ -20,3 +20,10 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.search-item {
+    background: #ffffff;
+}
+.search-item:hover {
+    background: #c9e8fd;
+}

@@ -44,7 +44,7 @@ const GetJwtToken = () => {
   // empty => call api
   // save to cookie
   const jwt =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKV1QgZGVtbyIsImp0aSI6ImU3NDRiMGQxLTMwMTctNDEzNS05MjZiLTA4ZjRlYjE2MDk3ZiIsImlhdCI6IjE3MTA3OTE2MjYiLCJVc2VyTmFtZSI6Imh1eXJhdGlvIiwiZXhwIjoxNzEwNzk1MjI2LCJpc3MiOiJIdXlyYXRpbyIsImF1ZCI6Ikh1eSBuZ3V5ZW4ifQ.JCWahnTU_VR-bTx0Kwa58g41S10d2xwS6atl5UFpdGE";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKV1QgZGVtbyIsImp0aSI6IjIxZDY4ZmRmLTM1MTctNGYxNy05NTQzLTJmYzMzZWMyODJiOCIsImlhdCI6IjE3MTA4NDY1NDEiLCJVc2VyTmFtZSI6Imh1eXJhdGlvIiwiZXhwIjoxNzEwODUwMTQxLCJpc3MiOiJIdXlyYXRpbyIsImF1ZCI6Ikh1eSBuZ3V5ZW4ifQ.CFxxJmwxRFDypP92HFJnH4yqlqKhX1Mh6Kbiq3_taIk";
   return jwt;
 };
 
@@ -96,7 +96,7 @@ const BuildSongSearchCardItemHtml = (song) => {
       ? ""
       : `<img src="${song.imageUrl}" style="height:50px;width:90px" alt="${song.name}">`;
   let songItem = `
-  <div class="js_selectSearchResultEvent" data-id=${song.id}>
+  <div class="js_selectSearchResultEvent search-item" data-id=${song.id}>
     <h3>${song.displayName}</h3>
     ${imageBlock}
     <p>${artist}</p>  
@@ -155,7 +155,8 @@ const BuildSongDetailHtml = (song) => {
   let result = `<h2>${song.displayName}</h2>
   <div>
       <img src="${song.imageUrl}" alt="${song.name}" style="height:300px;width:auto" />
-  </div>          
+  </div>    
+  <p>Views: ${song.views}</p>      
   ${artistBlockHtml}
   ${mediaPlatformBlockHtml}    
   <div>
