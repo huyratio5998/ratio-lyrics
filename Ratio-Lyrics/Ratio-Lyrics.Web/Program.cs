@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Ratio_Lyrics.Web.Data;
 using Ratio_Lyrics.Web.DependencyInjection;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,11 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration["RedisURL"];
+});
+builder.Services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(c =>
+{
+    var config = builder.Configuration["RedisURL"];
+    return ConnectionMultiplexer.Connect(config);
 });
 
 // Add services to the container.

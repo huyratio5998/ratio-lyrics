@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ratio_Lyrics.Web.Data;
 
@@ -11,9 +12,11 @@ using Ratio_Lyrics.Web.Data;
 namespace Ratio_Lyrics.Web.Data.Migrations
 {
     [DbContext(typeof(RatioLyricsDBContext))]
-    partial class RatioLyricsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240320034137_add index")]
+    partial class addindex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -359,7 +362,7 @@ namespace Ratio_Lyrics.Web.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
@@ -379,7 +382,7 @@ namespace Ratio_Lyrics.Web.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DisplayName", "SearchKey");
+                    b.HasIndex("SearchKey");
 
                     b.ToTable("Songs");
                 });

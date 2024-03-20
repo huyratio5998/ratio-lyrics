@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Ratio_Lyrics.Api.ServiceConfiguration;
 using Ratio_Lyrics.Api.SwaggerConfig;
 using Ratio_Lyrics.Web.DependencyInjection;
+using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,11 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration["RedisURL"];
+});
+builder.Services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(c =>
+{
+    var config = builder.Configuration["RedisURL"];
+    return ConnectionMultiplexer.Connect(config);
 });
 
 // Add services to the container.

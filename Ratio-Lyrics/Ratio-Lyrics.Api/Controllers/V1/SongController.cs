@@ -30,6 +30,7 @@ namespace Ratio_Lyrics.Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Search([FromQuery] string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return BadRequest();
@@ -50,6 +51,7 @@ namespace Ratio_Lyrics.Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Get([FromQuery] int id)
         {
             if(id <= 0) return BadRequest();
@@ -66,6 +68,6 @@ namespace Ratio_Lyrics.Api.Controllers.V1
             await _songService.UpdateViewsAsync(id, timeoutCts.Token);
 
             return Ok(song);
-        }
+        }        
     }
 }

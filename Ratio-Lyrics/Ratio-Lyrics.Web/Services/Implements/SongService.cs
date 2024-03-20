@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Ratio_Lyrics.Web.Constants;
 using Ratio_Lyrics.Web.Entities;
 using Ratio_Lyrics.Web.Helpers;
@@ -9,8 +8,7 @@ using Ratio_Lyrics.Web.Models;
 using Ratio_Lyrics.Web.Repositories.Abstracts;
 using Ratio_Lyrics.Web.Services.Abstraction;
 using System.Text.Json;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
+using System.Threading;
 
 namespace Ratio_Lyrics.Web.Services.Implements
 {
@@ -28,6 +26,8 @@ namespace Ratio_Lyrics.Web.Services.Implements
         private readonly IBaseRepository<Song> _songRepository;
         private const string wwwRootAddress = "wwwroot";
         private const string version = "v1";
+        private static readonly SemaphoreSlim _semaphore 
+            = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
         public SongService(IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -92,6 +92,9 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 await _unitOfWork.CommitAsync();
                 _logger.LogInformation($"Commit create song successfully");
 
+                //clear cache
+                var cacheKey = $"{version}-{nameof(SongService)}-Get*";
+                await _cacheService.ClearCacheAsync(cacheKey);
                 return createdSong.Id;
             }
             catch (Exception ex)
@@ -185,7 +188,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             });
 
             var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongAsync)}-{songId}";
-            return await _cacheService.GetOrExecute(task, cacheKey, Constants.CommonConstant.AbsoluteExpirationDefault, Constants.CommonConstant.SlidingCacheExpireDefault);
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
         public async Task<SongViewModel?> GetSongAsync(string text, bool isTracking = true)
@@ -212,7 +215,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             });            
 
             var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongAsync)}-{text}";
-            return await _cacheService.GetOrExecute(task, cacheKey, Constants.CommonConstant.AbsoluteExpirationDefault, Constants.CommonConstant.SlidingCacheExpireDefault);
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
         public async Task<PagedResponse<SongViewModel>> GetSuggestSongsAsync(BaseQueryParams queryParams)
@@ -269,7 +272,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             });            
 
             var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSuggestSongsAsync)}-{queryParams.SearchText}";
-            return await _cacheService.GetOrExecute(task, cacheKey, Constants.CommonConstant.AbsoluteExpirationDefault, Constants.CommonConstant.SlidingCacheExpireDefault);
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
         public async Task<PagedResponse<SongViewModel>> GetSongsAsync(BaseQueryParams queryParams)
@@ -313,7 +316,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             });            
 
             var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongsAsync)}-{JsonSerializer.Serialize(queryParams)}";
-            return await _cacheService.GetOrExecute(task, cacheKey, Constants.CommonConstant.AbsoluteExpirationDefault, Constants.CommonConstant.SlidingCacheExpireDefault);
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
         public async Task<bool> UpdateSongAsync(SongViewModel newSong)
@@ -364,6 +367,9 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 await _unitOfWork.CommitAsync();
                 _logger.LogInformation($"Commit update song successfully");
 
+                //clear cache
+                var cacheKey = $"{version}-{nameof(SongService)}-Get*";
+                await _cacheService.ClearCacheAsync(cacheKey);
                 return true;
             }
             catch (Exception ex)
@@ -417,18 +423,29 @@ namespace Ratio_Lyrics.Web.Services.Implements
         }
 
         public async Task<SongViewsResponseViewModel> UpdateViewsAsync(int songId, CancellationToken token)
-        {            
-            var songLyric = await _unitOfWork.GetRepository<SongLyric>()
+        {
+            await _semaphore.WaitAsync();
+            try
+            {
+                return await Task.Run(async () =>
+                {
+                    var songLyric = await _unitOfWork.GetRepository<SongLyric>()
                 .GetAll(true).AsQueryable()
                 .FirstOrDefaultAsync(x => x.SongId == songId);
-            if (songLyric == null)
-                return new SongViewsResponseViewModel(false, 0);
+                    if (songLyric == null)
+                        return new SongViewsResponseViewModel(false, 0);
 
-            songLyric.Views++;
-            await _unitOfWork.SaveAsync(token);
+                    songLyric.Views++;
+                    await _unitOfWork.SaveAsync(token);
 
-            _logger.LogInformation($"Song views updated: songId: {songId}, views: {StringHelper.FormatViews((int)songLyric.Views)}");
-            return new SongViewsResponseViewModel(true, songLyric.Views);
+                    _logger.LogInformation($"Song views updated: songId: {songId}, views: {StringHelper.FormatViews((int)songLyric.Views)}");
+                    return new SongViewsResponseViewModel(true, songLyric.Views);
+                });
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public async Task<bool> DeleteSongAsync(int id)
@@ -437,6 +454,10 @@ namespace Ratio_Lyrics.Web.Services.Implements
             if (!result) return false;
 
             await _unitOfWork.SaveAsync();
+
+            //clear cache
+            var cacheKey = $"{version}-{nameof(SongService)}-Get*";
+            await _cacheService.ClearCacheAsync(cacheKey);
             return true;
         }
     }

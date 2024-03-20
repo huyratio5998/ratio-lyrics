@@ -14,7 +14,7 @@ namespace Ratio_Lyrics.Web.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<Song>().HasIndex(x => x.SearchKey);
+            builder.Entity<Song>().HasIndex(x => new { x.DisplayName, x.SearchKey});
             builder.Entity<SongArtist>().HasKey(x => new { x.SongId, x.ArtistId });
             builder.Entity<SongMediaPlatform>().HasKey(x => new { x.SongId, x.MediaPlatformId });
 
