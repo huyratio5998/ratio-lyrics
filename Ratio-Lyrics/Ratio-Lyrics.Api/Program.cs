@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Ratio_Lyrics.Api.ServiceConfiguration;
 using Ratio_Lyrics.Api.SwaggerConfig;
 using Ratio_Lyrics.Web.DependencyInjection;
+using Ratio_Lyrics.Web.Services.Implements;
 using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
 

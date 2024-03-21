@@ -17,13 +17,16 @@ namespace Ratio_Lyrics.Api.Controllers.V1
     {
         private readonly ILogger<SongController> _logger;
         private readonly ISongService _songService;        
+        private readonly IServiceProvider _serviceProvider;
+        private RunUpdateViewsBackgroundTask _updateViewTask;
         private const int SearchNumberDefault = 5;
         private const int MaxOrderTimeExecuteMinutes = 5;
 
-        public SongController(ILogger<SongController> logger, ISongService songService, IHostedService hostedService)
+        public SongController(ILogger<SongController> logger, ISongService songService, IServiceProvider serviceProvider)
         {
             _logger = logger;
-            _songService = songService;            
+            _songService = songService;
+            _serviceProvider = serviceProvider;
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -59,15 +62,18 @@ namespace Ratio_Lyrics.Api.Controllers.V1
             var song = await _songService.GetSongAsync(id, false);            
             if (song == null) return NotFound();
 
-            //var hostedService = new RunUpdateViewsBackgroundTask(song.Id, _songService, _logger);
-            //await hostedService.StartAsync(timeoutCts.Token);            
-
-            //woud run in background queue. => ...
-            var timeoutCts = new CancellationTokenSource();
-            timeoutCts.CancelAfter(TimeSpan.FromMinutes(MaxOrderTimeExecuteMinutes));
-            await _songService.UpdateViewsAsync(id, timeoutCts.Token);
+            await UpdateViewsInBackground(id, _serviceProvider, _logger);
 
             return Ok(song);
-        }        
+        }
+
+        private async Task UpdateViewsInBackground(int id, IServiceProvider provider, ILogger logger)
+        {
+            var timeoutCts = new CancellationTokenSource();
+            timeoutCts.CancelAfter(TimeSpan.FromMinutes(MaxOrderTimeExecuteMinutes));
+            _updateViewTask = new RunUpdateViewsBackgroundTask(id, provider, logger);
+            await _updateViewTask.StartAsync(timeoutCts.Token);
+            //await _updateViewTask.StopAsync(timeoutCts.Token);
+        }
     }
 }

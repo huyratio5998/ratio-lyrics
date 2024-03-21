@@ -7,7 +7,7 @@
         public static string Youtube = "Youtube";
         public static string Spotify = "Spotify";
 
-        public static TimeSpan SlidingCacheExpireDefault = TimeSpan.FromMinutes(2);
+        public static TimeSpan SlidingCacheExpireDefault = TimeSpan.FromMinutes(10);
         public static DateTimeOffset AbsoluteExpirationDefault = DateTime.Now.AddMinutes(5);
     }
 }

@@ -5,14 +5,14 @@ namespace Ratio_Lyrics.Web.Services.Implements
 {
     public class RunUpdateViewsBackgroundTask : BackgroundService
     {
-        private readonly ISongService _songService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
         private int _songId = 0;
 
-        public RunUpdateViewsBackgroundTask(int songId, ISongService songService, ILogger logger)
+        public RunUpdateViewsBackgroundTask(int songId, IServiceProvider serviceProvider, ILogger logger)
         {
             _songId = songId;
-            _songService = songService;
+            _serviceProvider = serviceProvider;
             _logger = logger;
         }
 
@@ -21,8 +21,12 @@ namespace Ratio_Lyrics.Web.Services.Implements
             _logger.LogInformation("Background: Update song views service running.");            
             try
             {
-                var result = await _songService.UpdateViewsAsync(_songId, stoppingToken);
-                _logger.LogInformation($"Background: Update song views: {(int)result.Views}");
+                using(var scope = _serviceProvider.CreateScope())
+                {
+                    var songService = scope.ServiceProvider.GetRequiredService<ISongService>();
+                    var result = await songService.UpdateViewsAsync(_songId, stoppingToken);
+                    _logger.LogInformation($"Background: Update song views: {(int)result.Views}");
+                }
             }
             catch (Exception ex)
             {

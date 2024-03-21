@@ -9,6 +9,7 @@ using Ratio_Lyrics.Web.Repositories.Abstracts;
 using Ratio_Lyrics.Web.Services.Abstraction;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Ratio_Lyrics.Web.Services.Implements
 {
@@ -166,120 +167,126 @@ namespace Ratio_Lyrics.Web.Services.Implements
             _logger.LogInformation($"Save song media links");
         }
 
+        private async Task<SongViewModel?> GetSongAsyncTask(int songId, bool isTracking = true)
+        {
+            if (songId <= 0) return new SongViewModel();
+            _logger.LogInformation($"Start get song by id");
+            var song = await _songRepository
+                   .GetAll(isTracking).AsQueryable()
+                   .Include(x => x.Lyric)
+                   .Include(x => x.MediaPlatformLinks)
+                   .ThenInclude(song => song.MediaPlatform)
+                   .Include(x => x.SongArtists)
+                   .ThenInclude(song => song.Artist)
+                   .FirstOrDefaultAsync(x => x.Id == songId);
+
+            if (song == null || song.Id == 0) return null;
+
+            return _mapper.Map<SongViewModel>(song);
+        }
+
         public async Task<SongViewModel?> GetSongAsync(int songId, bool isTracking = true)
         {
             if (songId <= 0) return new SongViewModel();
 
-            var task = Task.Run(async () =>
-            {
-
-                var song = await _songRepository
-                    .GetAll(isTracking).AsQueryable()
-                    .Include(x => x.Lyric)
-                    .Include(x => x.MediaPlatformLinks)
-                    .ThenInclude(song => song.MediaPlatform)
-                    .Include(x => x.SongArtists)
-                    .ThenInclude(song => song.Artist)
-                    .FirstOrDefaultAsync(x => x.Id == songId);
-
-                if (song == null || song.Id == 0) return null;
-
-                return _mapper.Map<SongViewModel>(song);
-            });
-
-            var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongAsync)}-{songId}";
-            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
+            var task = GetSongAsyncTask(songId,isTracking);
+            _logger.LogInformation($"End get song by id 1");
+            var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongAsync)}|{songId}";
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(20), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
+        private async Task<SongViewModel?> GetSongAsyncTask(string text, bool isTracking = true)
+        {
+            if (string.IsNullOrEmpty(text)) return null;
+
+            var song = await _songRepository
+            .GetAll(isTracking).AsQueryable()
+            .Include(x => x.Lyric)
+            .Include(x => x.MediaPlatformLinks)
+            .ThenInclude(song => song.MediaPlatform)
+            .Include(x => x.SongArtists)
+            .ThenInclude(song => song.Artist)
+            .FirstOrDefaultAsync(x => x.Name.Contains(text)
+                || x.DisplayName.Contains(text)
+                || x.Description.Contains(text)
+                || x.SearchKey.Contains(text));
+
+            if (song == null || song.Id == 0) return null;
+
+            return _mapper.Map<SongViewModel>(song);
+        }
         public async Task<SongViewModel?> GetSongAsync(string text, bool isTracking = true)
         {
             if (string.IsNullOrEmpty(text)) return null;
 
-            var task = Task.Run(async() =>
-            {
-                var song = await _songRepository
-                .GetAll(isTracking).AsQueryable()
-                .Include(x => x.Lyric)
-                .Include(x => x.MediaPlatformLinks)
-                .ThenInclude(song => song.MediaPlatform)
-                .Include(x => x.SongArtists)
-                .ThenInclude(song => song.Artist)
-                .FirstOrDefaultAsync(x => x.Name.Contains(text)
-                    || x.DisplayName.Contains(text)
-                    || x.Description.Contains(text)
-                    || x.SearchKey.Contains(text));
+            var task = GetSongAsyncTask(text, isTracking);
 
-                if (song == null || song.Id == 0) return null;
-
-                return _mapper.Map<SongViewModel>(song);
-            });            
-
-            var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongAsync)}-{text}";
-            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
+            var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongAsync)}|{text}";
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(20), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
-        public async Task<PagedResponse<SongViewModel>> GetSuggestSongsAsync(BaseQueryParams queryParams)
+        private async Task<PagedResponse<SongViewModel>> GetSuggestSongsAsyncTask(BaseQueryParams queryParams)
         {
-            var task = Task.Run(async () =>
-            {
-                IQueryable<Song> items = _songRepository
+            IQueryable<Song> items = _songRepository
                             .GetAll().AsQueryable()
                             .Include(x => x.Lyric)
                             .Include(x => x.SongArtists)
                             .ThenInclude(x => x.Artist);
 
-                // filter
-                if (!string.IsNullOrWhiteSpace(queryParams.SearchText))
-                    items = items
-                        .Where(x => x.Name.Contains(queryParams.SearchText)
-                        || x.DisplayName.Contains(queryParams.SearchText)
-                        || x.Description.Contains(queryParams.SearchText)
-                        || x.SearchKey.Contains(queryParams.SearchText));
+            // filter
+            if (!string.IsNullOrWhiteSpace(queryParams.SearchText))
+                items = items
+                    .Where(x => x.Name.Contains(queryParams.SearchText)
+                    || x.DisplayName.Contains(queryParams.SearchText)
+                    || x.Description.Contains(queryParams.SearchText)
+                    || x.SearchKey.Contains(queryParams.SearchText));
 
-                // order
-                var orderCondition = queryParams.OrderBy;
-                if (orderCondition != null)
+            // order
+            var orderCondition = queryParams.OrderBy;
+            if (orderCondition != null)
+            {
+                if (orderCondition == OrderType.Asc) items = items.OrderByDescending(x => x.Lyric.Views);
+                else if (orderCondition == OrderType.Desc) items = items.OrderBy(y => y.Lyric.Views);
+            }
+
+            // projection
+            items = items.Select(x => new Song
+            {
+                Id = x.Id,
+                Name = x.Name,
+                DisplayName = x.DisplayName,
+                Description = x.Description,
+                Image = x.Image,
+                Lyric = new SongLyric
                 {
-                    if (orderCondition == OrderType.Asc) items = items.OrderByDescending(x => x.Lyric.Views);
-                    else if (orderCondition == OrderType.Desc) items = items.OrderBy(y => y.Lyric.Views);
-                }
+                    Views = x.Lyric.Views
+                },
+                SongArtists = x.SongArtists
+            });
 
-                // projection
-                items = items.Select(x => new Song
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    DisplayName = x.DisplayName,
-                    Description = x.Description,
-                    Image = x.Image,
-                    Lyric = new SongLyric
-                    {
-                        Views = x.Lyric.Views
-                    },
-                    SongArtists = x.SongArtists
-                });
+            // paging
+            queryParams.PageNumber = 1;
+            queryParams.PageSize = queryParams.PageSize <= 0
+                ? Models.CommonConstant.PageSizeDefault : queryParams.PageSize;
 
-                // paging
-                queryParams.PageNumber = 1;
-                queryParams.PageSize = queryParams.PageSize <= 0
-                    ? Models.CommonConstant.PageSizeDefault : queryParams.PageSize;
+            var songs = await PagedResponse<Song>
+                .CreateAsync(items, queryParams.PageNumber, queryParams.PageSize);
 
-                var songs = await PagedResponse<Song>
-                    .CreateAsync(items, queryParams.PageNumber, queryParams.PageSize);
-
-                var result = _mapper.Map<PagedResponse<SongViewModel>>(songs);
-                return result;
-            });            
-
-            var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSuggestSongsAsync)}-{queryParams.SearchText}";
-            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
+            var result = _mapper.Map<PagedResponse<SongViewModel>>(songs);
+            return result;
         }
 
-        public async Task<PagedResponse<SongViewModel>> GetSongsAsync(BaseQueryParams queryParams)
+        public async Task<PagedResponse<SongViewModel>> GetSuggestSongsAsync(BaseQueryParams queryParams)
         {
-            var task = Task.Run(async() =>
-            {
-                IQueryable<Song> items = _songRepository
+            var task = GetSuggestSongsAsyncTask(queryParams);
+
+            var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSuggestSongsAsync)}|{queryParams.SearchText}";
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(20), Constants.CommonConstant.SlidingCacheExpireDefault);
+        }
+
+        private async Task<PagedResponse<SongViewModel>> GetSongsAsyncTask(BaseQueryParams queryParams)
+        {
+            IQueryable<Song> items = _songRepository
                             .GetAll().AsQueryable()
                             .Include(x => x.Lyric)
                             .Include(x => x.MediaPlatformLinks)
@@ -287,36 +294,40 @@ namespace Ratio_Lyrics.Web.Services.Implements
                             .Include(x => x.SongArtists)
                             .ThenInclude(x => x.Artist);
 
-                // filter
-                if (!string.IsNullOrWhiteSpace(queryParams.SearchText))
-                    items = items
-                        .Where(x => x.Name.Contains(queryParams.SearchText)
-                        || x.DisplayName.Contains(queryParams.SearchText)
-                        || x.SearchKey.Contains(queryParams.SearchText));
+            // filter
+            if (!string.IsNullOrWhiteSpace(queryParams.SearchText))
+                items = items
+                    .Where(x => x.Name.Contains(queryParams.SearchText)
+                    || x.DisplayName.Contains(queryParams.SearchText)
+                    || x.SearchKey.Contains(queryParams.SearchText));
 
-                // order
-                var orderCondition = queryParams.OrderBy;
-                if (orderCondition != null)
-                {
-                    if (orderCondition == OrderType.Asc) items = items.OrderBy(x => x.Id);
-                    else if (orderCondition == OrderType.Desc) items = items.OrderByDescending(y => y.Id);
-                }
+            // order
+            var orderCondition = queryParams.OrderBy;
+            if (orderCondition != null)
+            {
+                if (orderCondition == OrderType.Asc) items = items.OrderBy(x => x.Id);
+                else if (orderCondition == OrderType.Desc) items = items.OrderByDescending(y => y.Id);
+            }
 
-                // paging
-                queryParams.PageNumber = queryParams.PageNumber <= 0
-                    ? Models.CommonConstant.PageIndexDefault : queryParams.PageNumber;
-                queryParams.PageSize = queryParams.PageSize <= 0
-                    ? Models.CommonConstant.PageSizeDefault : queryParams.PageSize;
+            // paging
+            queryParams.PageNumber = queryParams.PageNumber <= 0
+                ? Models.CommonConstant.PageIndexDefault : queryParams.PageNumber;
+            queryParams.PageSize = queryParams.PageSize <= 0
+                ? Models.CommonConstant.PageSizeDefault : queryParams.PageSize;
 
-                var songs = await PagedResponse<Song>
-                    .CreateAsync(items, queryParams.PageNumber, queryParams.PageSize);
+            var songs = await PagedResponse<Song>
+                .CreateAsync(items, queryParams.PageNumber, queryParams.PageSize);
 
-                var result = _mapper.Map<PagedResponse<SongViewModel>>(songs);
-                return result;
-            });            
+            var result = _mapper.Map<PagedResponse<SongViewModel>>(songs);
+            return result;
+        }
 
-            var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongsAsync)}-{JsonSerializer.Serialize(queryParams)}";
-            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
+        public async Task<PagedResponse<SongViewModel>> GetSongsAsync(BaseQueryParams queryParams)
+        {
+            var task = GetSongsAsyncTask(queryParams);
+
+            var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongsAsync)}|{JsonSerializer.Serialize(queryParams)}";
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(20), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
         public async Task<bool> UpdateSongAsync(SongViewModel newSong)
@@ -427,20 +438,18 @@ namespace Ratio_Lyrics.Web.Services.Implements
             await _semaphore.WaitAsync();
             try
             {
-                return await Task.Run(async () =>
-                {
-                    var songLyric = await _unitOfWork.GetRepository<SongLyric>()
-                .GetAll(true).AsQueryable()
+                _logger.LogInformation("Start update view");
+                var songLyric = await _unitOfWork.GetRepository<SongLyric>()
+                .GetAll(true).AsQueryable()                
                 .FirstOrDefaultAsync(x => x.SongId == songId);
-                    if (songLyric == null)
-                        return new SongViewsResponseViewModel(false, 0);
+                if (songLyric == null)
+                    return new SongViewsResponseViewModel(false, 0);
 
-                    songLyric.Views++;
-                    await _unitOfWork.SaveAsync(token);
+                songLyric.Views++;
+                await _unitOfWork.SaveAsync(token);                
 
-                    _logger.LogInformation($"Song views updated: songId: {songId}, views: {StringHelper.FormatViews((int)songLyric.Views)}");
-                    return new SongViewsResponseViewModel(true, songLyric.Views);
-                });
+                _logger.LogInformation($"Song views updated: songId: {songId}, views: {StringHelper.FormatViews((int)songLyric.Views)}");
+                return new SongViewsResponseViewModel(true, songLyric.Views);
             }
             finally
             {
