@@ -70,28 +70,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(SongViewModel newSong)
-        {
-            //demo media links
-            if(!string.IsNullOrEmpty(newSong.MediaLinksForm))
-                newSong.MediaPlatformLinks = JsonSerializer.Deserialize<List<SongMediaPlatformViewModel>>(newSong.MediaLinksForm);
-            if(newSong.MediaPlatformLinks != null && newSong.MediaPlatformLinks.Any())
-            {
-                foreach (var item in newSong.MediaPlatformLinks)
-                {
-                    if (item.Name.Equals(Constants.CommonConstant.Spotify)) item.Link = newSong.SpotifyLink ?? string.Empty;
-                    else if (item.Name.Equals(Constants.CommonConstant.Youtube)) item.Link = newSong.YoutubeLink ?? string.Empty;
-                    else if (item.Name.Equals(Constants.CommonConstant.AppleMusic)) item.Link = newSong.AppleMusicLink ?? string.Empty;
-                }
-            }
-
-            //demo artist
-            newSong.Artists = newSong.ArtistForm?.Split(',')
-                .Select(x=> new ArtistViewModel
-                {
-                    Name = x.Trim()
-                })
-                .ToList();
-
+        {            
             var songId = await _songService.CreateSongAsync(newSong);
             if (songId != 0) return RedirectToAction(nameof(Index));
 

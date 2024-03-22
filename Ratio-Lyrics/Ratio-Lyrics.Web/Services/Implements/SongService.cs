@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Caching.Distributed;
 using Ratio_Lyrics.Web.Constants;
 using Ratio_Lyrics.Web.Entities;
@@ -9,11 +8,7 @@ using Ratio_Lyrics.Web.Helpers;
 using Ratio_Lyrics.Web.Models;
 using Ratio_Lyrics.Web.Repositories.Abstracts;
 using Ratio_Lyrics.Web.Services.Abstraction;
-using StackExchange.Redis;
-using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Ratio_Lyrics.Web.Services.Implements
 {
@@ -21,8 +16,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
     {
         private readonly IArtistService _artistService;
         private readonly IMediaPlatformService _mediaPlatformService;
-        private readonly ICacheService _cacheService;
-        private readonly IDistributedCache _distributedCache;
+        private readonly ICacheService _cacheService;        
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMapper _mapper;
@@ -41,8 +35,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             IArtistService artistService,
             IMediaPlatformService mediaPlatformService,
             ILogger<SongService> logger,
-            ICacheService cacheService,
-            IDistributedCache distributedCache)
+            ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -52,15 +45,40 @@ namespace Ratio_Lyrics.Web.Services.Implements
             _mediaPlatformService = mediaPlatformService;
             _songRepository = _unitOfWork.GetRepository<Song>();
             _logger = logger;
-            _cacheService = cacheService;
-            _distributedCache = distributedCache;
+            _cacheService = cacheService;            
+        }
+
+        private void MapAdditionSongInfo(SongViewModel newSong)
+        {
+            //demo media links
+            newSong.DisplayName = string.IsNullOrWhiteSpace(newSong.DisplayName) ? newSong.Name : newSong.DisplayName;
+            if (!string.IsNullOrEmpty(newSong.MediaLinksForm))
+                newSong.MediaPlatformLinks = JsonSerializer.Deserialize<List<SongMediaPlatformViewModel>>(newSong.MediaLinksForm);
+            if (newSong.MediaPlatformLinks != null && newSong.MediaPlatformLinks.Any())
+            {
+                foreach (var item in newSong.MediaPlatformLinks)
+                {
+                    if (item.Name.Equals(Constants.CommonConstant.Spotify)) item.Link = newSong.SpotifyLink ?? string.Empty;
+                    else if (item.Name.Equals(Constants.CommonConstant.Youtube)) item.Link = newSong.YoutubeLink ?? string.Empty;
+                    else if (item.Name.Equals(Constants.CommonConstant.AppleMusic)) item.Link = newSong.AppleMusicLink ?? string.Empty;
+                }
+            }
+
+            //demo artist
+            newSong.Artists = newSong.ArtistForm?.Split(',')
+                .Select(x => new ArtistViewModel
+                {
+                    Name = x.Trim()
+                })
+                .ToList();
         }
 
         public async Task<int> CreateSongAsync(SongViewModel newSong)
         {
             try
             {
-                _logger.LogInformation("Create song in-process:");
+                _logger.LogInformation("Start validate new song");
+                MapAdditionSongInfo(newSong);                
                 var validateResult = await _validator.ValidateAsync(newSong);
                 if (!validateResult.IsValid)
                 {
@@ -68,6 +86,14 @@ namespace Ratio_Lyrics.Web.Services.Implements
                     return 0;
                 }
 
+                var isUnique = await VerifySongUnique(newSong.Name, newSong.Artists);
+                if (!isUnique)
+                {
+                    _logger.LogError($"Song existed! Name: {newSong.Name}, Artist: {newSong.ArtistForm}");
+                    return 0;
+                }
+
+                _logger.LogInformation("Create song in-process:");
                 await _unitOfWork.CreateTransactionAsync();
                 Task uploadImage = null;
                 if (newSong.Image != null)
@@ -196,7 +222,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             }));
 
             var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongAsync)}|{songId}";
-            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(20), Constants.CommonConstant.SlidingCacheExpireDefault);
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
         public async Task<SongViewModel?> GetSongAsync(string text, bool isTracking = true)
@@ -225,7 +251,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             }));
 
             var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongAsync)}|{text}";
-            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(20), Constants.CommonConstant.SlidingCacheExpireDefault);
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
         public async Task<PagedResponse<SongViewModel>> GetSuggestSongsAsync(BaseQueryParams queryParams)
@@ -283,7 +309,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             }));
 
             var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSuggestSongsAsync)}|{queryParams.SearchText}";
-            var results = await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(20), Constants.CommonConstant.SlidingCacheExpireDefault);
+            var results = await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
 
             return results;
         }
@@ -329,7 +355,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             }));
 
             var cacheKey = $"{version}-{nameof(SongService)}-{nameof(GetSongsAsync)}|{JsonSerializer.Serialize(queryParams)}";
-            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(20), Constants.CommonConstant.SlidingCacheExpireDefault);
+            return await _cacheService.GetOrExecute(task, cacheKey, DateTime.Now.AddMinutes(5), Constants.CommonConstant.SlidingCacheExpireDefault);
         }
 
         public async Task<bool> UpdateSongAsync(SongViewModel newSong)
@@ -470,6 +496,80 @@ namespace Ratio_Lyrics.Web.Services.Implements
             var cacheKey = $"{version}-{nameof(SongService)}-Get*";
             await _cacheService.ClearCacheAsync(cacheKey);
             return true;
+        }
+
+        public async Task<bool> VerifySongUnique(string text, List<ArtistViewModel>? artist)
+        {
+            if (string.IsNullOrEmpty(text)) return false;
+
+            var song = await _songRepository
+                .GetAll().AsQueryable()
+                .Include(x => x.SongArtists)
+                .ThenInclude(song => song.Artist)
+                .FirstOrDefaultAsync(x => x.Name.Equals(text)
+                || x.DisplayName.Equals(text));
+
+            if (song == null) return true;
+            if (song.SongArtists == null || !song.SongArtists.Any()) return false;
+
+            if (artist != null && artist.Any())
+            {
+                foreach (var item in artist)
+                {
+                    if (song.SongArtists.Any(x => x.Artist.Name.Equals(item.Name, StringComparison.OrdinalIgnoreCase))) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public string BuildSearchKey(SongViewModel newSong)
+        {
+            string nameFormated = StringHelper.RemoveSign4VietnameseString(newSong.Name);
+            string nameNoSpace = newSong.Name.Replace(" ", "");
+            string nameFormatedNoSpace = nameFormated.Replace(" ", "");
+            var listKeywords = new List<string>();
+            listKeywords.Add(nameFormated);
+            listKeywords.Add(newSong.Name);
+            listKeywords.Add(nameNoSpace);
+            listKeywords.Add(nameFormatedNoSpace);
+            if (!string.IsNullOrWhiteSpace(newSong.ArtistForm))
+            {
+                var artists = newSong.ArtistForm.Split(',');
+                foreach (var artist in artists)
+                {
+                    var artistNoAccent = StringHelper.RemoveSign4VietnameseString(artist);
+                    var artistNoSpace = artist.Replace(" ", "");
+                    var artistNoAccentNoSpace = artistNoAccent.Replace(" ", "");
+                    listKeywords.Add(artist);
+                    listKeywords.Add(artistNoAccent);
+                    listKeywords.Add(artistNoSpace);
+                    listKeywords.Add(artistNoAccentNoSpace);
+                    listKeywords.Add($"{newSong.Name} {artist}");
+                    listKeywords.Add($"{newSong.Name} {artistNoAccent}");
+                    listKeywords.Add($"{newSong.Name} {artistNoSpace}");
+                    listKeywords.Add($"{newSong.Name} {artistNoAccentNoSpace}");
+
+                    listKeywords.Add($"{nameFormated} {artist}");
+                    listKeywords.Add($"{nameFormated} {artistNoAccent}");
+                    listKeywords.Add($"{nameFormated} {artistNoSpace}");
+                    listKeywords.Add($"{nameFormated} {artistNoAccentNoSpace}");
+
+                    listKeywords.Add($"{nameNoSpace} {artist}");
+                    listKeywords.Add($"{nameNoSpace} {artistNoAccent}");
+                    listKeywords.Add($"{nameNoSpace} {artistNoSpace}");
+                    listKeywords.Add($"{nameNoSpace} {artistNoAccentNoSpace}");
+
+                    listKeywords.Add($"{nameFormated} {artist}");
+                    listKeywords.Add($"{nameFormated} {artistNoAccent}");
+                    listKeywords.Add($"{nameFormated} {artistNoSpace}");
+                    listKeywords.Add($"{nameFormated} {artistNoAccentNoSpace}");
+                }
+            }
+
+            var results = string.Join(", ", listKeywords.Distinct());
+
+            return results;
         }
     }
 }

@@ -2,18 +2,46 @@
 @inject IConfiguration Configuration
 @model SongViewModel
 @{
-    ViewData["Title"] = "Home";    
+    ViewData["Title"] = "Home";
     var publicApiHost = Configuration["PublicApiUrl"].ToString() ?? "https://localhost:7186";
 }
 <input type="hidden" value="@publicApiHost" id="public-api-host" />
-@if(Model == null)
+@if (Model != null && Model.Id != 0)
 {
     <div class="form-group row">
         <img src="/images/logos/ratiolyrics-logo-transparent.png" class="align-content-center mb-1" style="width:300px; height: auto" />
         <input type="text" id="input-search-songs" autocomplete="off" class="form-control col-6" />
     </div>
-    <div id="searchResultDemoArea"></div>
-    <div id="songDetailArea"></div>
+    <div id="searchResultDemoArea">        
+    </div>
+    <div id="songDetailArea">
+        <h2>@Model.DisplayName</h2>
+        <div>
+            <img src="@Model.ImageUrl" alt="@Model.DisplayName" style="height:300px;width:auto" />
+        </div>
+        <p>Views: @StringHelper.FormatViews((int)Model.Views)</p>
+        @if (Model.Artists != null && Model.Artists.Any())
+        {
+            <h3>Artist:</h3>
+            <p><i>@string.Join(", ", Model.Artists.Select(x => x.Name))</i></p>
+        }
+        <h3>Media Links:</h3>
+        @if (Model.MediaPlatformLinks != null && Model.MediaPlatformLinks.Any())
+        {
+            <ul>
+                @foreach (var item in Model.MediaPlatformLinks)
+                {
+                    if (string.IsNullOrEmpty(item.Link)) continue;
+                    <li><a href="@item.Link" target="_blank">@item.Name</a></li>
+                }
+            </ul>
+        }
+
+        <div>
+            <h3>Lyrics:</h3>
+            <div>@Html.Raw(Model.Lyric)</div>
+        </div>
+    </div>
 }
 else
 {
@@ -21,35 +49,14 @@ else
         <img src="/images/logos/ratiolyrics-logo-transparent.png" class="align-content-center mb-1" style="width:300px; height: auto" />
         <input type="text" id="input-search-songs" autocomplete="off" class="form-control col-6" />
     </div>
-    <div id="searchResultDemoArea"></div>
-    <div id="songDetailArea">
-        <h2>@Model.DisplayName</h2>
-        <div>
-            <img src="@Model.ImageUrl" alt="@Model.DisplayName" style="height:300px;width:auto" />
-        </div>
-        <p>Views: @StringHelper.FormatViews((int)Model.Views)</p>
-        @if(Model.Artists != null && Model.Artists.Any())
-        {
-            <h3>Artist:</h3>
-            <p><i>@string.Join(", ", Model.Artists.Select(x=>x.Name))</i></p>            
-        }
-        <h3>Media Links:</h3>
-        @if(Model.MediaPlatformLinks != null && Model.MediaPlatformLinks.Any())
-        {
-            <ul>
-                @foreach(var item in Model.MediaPlatformLinks)
-                {
-                    if (string.IsNullOrEmpty(item.Link)) continue;
-                    <li><a href="@item.Link" target="_blank">@item.Name</a></li>
-                }
-            </ul>            
-        }
-
-        <div>
-            <h3>Lyrics:</h3>
-            <div>@Html.Raw(Model.Lyric)</div>
-        </div>        
+    <div id="searchResultDemoArea">        
     </div>
+    <div id="songDetailArea"></div>
+
 }
+
+<div id="formCreateSongArea">
+    <partial name="/Views/Home/Partial/Create.cshtml" model="Model" />
+</div>
 
 <script type="module" defer src="@Url.Content("~/js/home.js")"></script>

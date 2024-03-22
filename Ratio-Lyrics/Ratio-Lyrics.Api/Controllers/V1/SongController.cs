@@ -72,8 +72,7 @@ namespace Ratio_Lyrics.Api.Controllers.V1
             var timeoutCts = new CancellationTokenSource();
             timeoutCts.CancelAfter(TimeSpan.FromMinutes(MaxOrderTimeExecuteMinutes));
             _updateViewTask = new RunUpdateViewsBackgroundTask(id, provider, logger);
-            await _updateViewTask.StartAsync(timeoutCts.Token);
-            //await _updateViewTask.StopAsync(timeoutCts.Token);
+            await _updateViewTask.StartAsync(timeoutCts.Token);            
         }
     }
 }

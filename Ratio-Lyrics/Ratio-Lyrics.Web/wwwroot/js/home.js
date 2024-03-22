@@ -175,7 +175,8 @@ const HandleSearchSongDisplay = async (e, searchAnyway = false) => {
 
   const data = await SearchSongsByNameApi(inputValue, 1);
   if (data == null || data.items.length == 0 || data.totalRecords == 0) {
-    searchResultDemoArea.innerHTML = `<p>Not found</p>`;
+    searchResultDemoArea.innerHTML = `<p>Not found.<i> Want to contribute new song</i> <button class="js_btn-contribute-song btn btn-sm btn-info mt-1" data-bs-toggle="modal" data-bs-target="#contribute-song-modal">Add new song</button></p>`;
+    ContributeNewSongEvent();
     return;
   } else {
     searchResultDemoArea.innerHTML = BuildSongSearchResultHtml(data);
@@ -223,6 +224,13 @@ const ChooseSongSearchResultEvent = () => {
       });
     }
   });
+};
+
+const ContributeNewSongEvent = () => {
+  const btnContribute = document.querySelector(".js_btn-contribute-song");
+  if (!btnContribute) return;
+
+  //
 };
 
 SearchSongEvent();
