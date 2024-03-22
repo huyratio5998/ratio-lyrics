@@ -3,6 +3,7 @@ using Ratio_Lyrics.Web.Services.Abstraction;
 using StackExchange.Redis;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Ratio_Lyrics.Web.Services.Implements
 {
@@ -40,17 +41,15 @@ namespace Ratio_Lyrics.Web.Services.Implements
             }
             
             _logger.LogInformation($"Clear cache with pattern: {pattern}");
-        }
+        }        
 
-        public async Task<T> GetOrExecute<T>(Task<T> task, string key, DateTimeOffset absoluteExpiration, TimeSpan slidingExpiration)
+        public async Task<T> GetOrExecute<T>(Lazy<Task<T>> lazyInitializeTask, string key, DateTimeOffset absoluteExpiration, TimeSpan slidingExpiration)
         {
             try
             {
                 _logger.LogInformation($"Start cache service. Key: {key}");
-                T? result;
-                _logger.LogInformation($"Start get cache value from key");
-                var cacheResult = await _distributedCache.GetAsync(key);
-                _logger.LogInformation($"End get cache value from key");
+                T? result;                
+                var cacheResult = await _distributedCache.GetAsync(key);                
                 if (cacheResult != null)
                 {
                     _logger.LogInformation("Get cache data");
@@ -58,7 +57,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 }
                 else
                 {
-                    result = await task;
+                    result = await lazyInitializeTask.Value.ConfigureAwait(false);
                     var option = new DistributedCacheEntryOptions()
                                 .SetAbsoluteExpiration(absoluteExpiration)
                                 .SetSlidingExpiration(slidingExpiration);
@@ -68,6 +67,16 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 }
 
                 return result;
+            }
+            catch (RedisConnectionException ex)
+            {
+                _logger.LogError($"Redis connection exception: {ex}");
+                return await lazyInitializeTask.Value.ConfigureAwait(false);
+            }
+            catch (RedisTimeoutException ex)
+            {
+                _logger.LogError($"Redis timeout exception: {ex}");
+                return await lazyInitializeTask.Value.ConfigureAwait(false);
             }
             catch (Exception ex)
             {
