@@ -47,6 +47,8 @@ namespace Ratio_Lyrics.Web.Helpers
 
         public static string RemoveSign4VietnameseString(string str)
         {            
+            if(string.IsNullOrEmpty(str)) return str;
+
             for (int i = 1; i < VietnameseSigns.Length; i++)
             {
                 for (int j = 0; j < VietnameseSigns[i].Length; j++)

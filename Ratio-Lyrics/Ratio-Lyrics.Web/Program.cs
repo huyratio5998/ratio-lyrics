@@ -26,6 +26,7 @@ builder.Services.AddConfigurationAutoMapper();
 builder.Services.AddApplicationRepositoriesConfig();
 builder.Services.AddApplicationServicesConfig();
 builder.Services.AddHttpClientFactoryConfig();
+builder.Services.AddGoogleCaptchaConfig(builder.Configuration);
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<RatioLyricsDBContext>();

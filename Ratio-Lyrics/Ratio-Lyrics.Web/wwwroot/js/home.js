@@ -227,10 +227,12 @@ const ChooseSongSearchResultEvent = () => {
 };
 
 const ContributeNewSongEvent = () => {
-  const btnContribute = document.querySelector(".js_btn-contribute-song");
-  if (!btnContribute) return;
+  const btnContributeSong = document.querySelector(".js_btn-contribute-song");
+  if (!btnContributeSong) return;
 
-  //
+  btnContributeSong.addEventListener("click", () => {
+    document.forms[0].reset();
+  });
 };
 
 SearchSongEvent();

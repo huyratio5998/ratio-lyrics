@@ -1,5 +1,5 @@
 ﻿@using System.Text.Json
-@model SongViewModel
+@model HomeViewModel
 
 <div id="contribute-song-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -8,73 +8,89 @@
                 <h5 class="modal-title" id="exampleModalLabel">Contribute song lyrics</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+                <form id="js_contribute-song-form" asp-action="Create" enctype="multipart/form-data">                    
             <div class="modal-body">
-                <form asp-action="Create" enctype="multipart/form-data">                    
                     <div class="col-md-4">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="form-group">
-                            <label asp-for="Name" class="control-label"></label>
-                            <input asp-for="Name" class="form-control" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
+                            <label asp-for="SongModel.Name" class="control-label"></label>
+                            <input asp-for="SongModel.Name" class="form-control" />
+                            <span asp-validation-for="SongModel.Name" class="text-danger"></span>
                         </div>
                         <div class="form-group">
-                            <label asp-for="Image" class="control-label js_img_changeTarget">
+                            <label asp-for="SongModel.Image" class="control-label js_img_changeTarget">
                                 <span>Image</span>
                                 <img src="~/images/songs/no-song.png" style="height:250px;width:auto" alt="product image" />
                             </label>
-                            <input type="file" asp-for="Image" class="form-control js_img_changeEvent" />
-                            <span asp-validation-for="Image" class="text-danger"></span>
+                            <input type="file" asp-for="SongModel.Image" class="form-control js_img_changeEvent" />
+                            <span asp-validation-for="SongModel.Image" class="text-danger"></span>
                         </div>
                         <div class="form-group">
-                            <label asp-for="ReleaseDate" class="control-label"></label>
-                            <input asp-for="ReleaseDate" class="form-control" />
-                            <span asp-validation-for="ReleaseDate" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="YoutubeLink" class="control-label"></label>
-                            <input asp-for="YoutubeLink" class="form-control" />
-                            <span asp-validation-for="YoutubeLink" class="text-danger"></span>
+                            <label asp-for="SongModel.ReleaseDate" class="control-label"></label>
+                            <input asp-for="SongModel.ReleaseDate" class="form-control" />
+                            <span asp-validation-for="SongModel.ReleaseDate" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
-                            <label asp-for="SpotifyLink" class="control-label"></label>
-                            <input asp-for="SpotifyLink" class="form-control" />
-                            <span asp-validation-for="SpotifyLink" class="text-danger"></span>
+                            <label asp-for="SongModel.YoutubeLink" class="control-label"></label>
+                            <input asp-for="SongModel.YoutubeLink" class="form-control" />
+                            <span asp-validation-for="SongModel.YoutubeLink" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
-                            <label asp-for="AppleMusicLink" class="control-label"></label>
-                            <input asp-for="AppleMusicLink" class="form-control" />
-                            <span asp-validation-for="AppleMusicLink" class="text-danger"></span>
+                            <label asp-for="SongModel.SpotifyLink" class="control-label"></label>
+                            <input asp-for="SongModel.SpotifyLink" class="form-control" />
+                            <span asp-validation-for="SongModel.SpotifyLink" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
-                            <label asp-for="ArtistForm" class="control-label"></label>
-                            <input asp-for="ArtistForm" class="form-control" />
-                            <span asp-validation-for="ArtistForm" class="text-danger"></span>
+                            <label asp-for="SongModel.AppleMusicLink" class="control-label"></label>
+                            <input asp-for="SongModel.AppleMusicLink" class="form-control" />
+                            <span asp-validation-for="SongModel.AppleMusicLink" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="SongModel.ArtistForm" class="control-label"></label>
+                            <input asp-for="SongModel.ArtistForm" class="form-control" />
+                            <span asp-validation-for="SongModel.ArtistForm" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="form-group col-md-8">
-                        <label asp-for="Lyric" class="control-label"></label>
-                        <textarea asp-for="Lyric" class="form-control"></textarea>
-                        <span asp-validation-for="Lyric" class="text-danger"></span>
+                        <label asp-for="SongModel.Lyric" class="control-label"></label>
+                        <textarea asp-for="SongModel.Lyric" class="form-control"></textarea>
+                        <span asp-validation-for="SongModel.Lyric" class="text-danger"></span>
                     </div>
-                    <input type="hidden" asp-for="MediaLinksForm" value="@JsonSerializer.Serialize(Model.MediaPlatformLinks)" />
-                    <div class="form-group col-md-4">
+                    <input type="hidden" asp-for="SongModel.MediaLinksForm" value="@JsonSerializer.Serialize(Model.SongModel.MediaPlatformLinks)" />
+                    @* <div class="form-group col-md-4">
                         <input type="submit" value="Create" class="btn btn-primary" />
-                    </div>
-                </form>
+                    </div> *@
+                    @if (Model.CaptchaSettings.IsVersion2())
+                    {
+                        <div class="g-recaptcha" data-sitekey="@Model.CaptchaSettings.SiteKey"></div>
+                    }                                      
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary js_save-AssignShipmentToShipper">Save changes</button>
-            </div>
+                    @if (Model.CaptchaSettings.IsVersion3())
+                    {
+                        <button class="btn btn-primary g-recaptcha" disabled type="submit"
+                                data-action="@Model.CaptchaSettings.Action" data-sitekey="@Model.CaptchaSettings.SiteKey" data-callback="onSubmit">
+                            Save
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary" type="submit">
+                            Save
+                        </button>
+                    }
+                </div>
+                </form>
         </div>
     </div>
 </div>
 
-@section Scripts {
+@section Scripts {    
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

@@ -43,7 +43,3 @@ ImageChangeAction(images);
 tinymce.init({
   selector: "textarea",
 });
-
-//
-ConvertToLocalDate();
-ConvertToLocalDateTime();

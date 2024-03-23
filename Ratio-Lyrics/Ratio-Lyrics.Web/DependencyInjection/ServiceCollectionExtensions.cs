@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Ratio_Lyrics.Web.Configurations.Mapper;
 using Ratio_Lyrics.Web.Data;
 using Ratio_Lyrics.Web.Models;
+using Ratio_Lyrics.Web.Models.Recaptcha;
 using Ratio_Lyrics.Web.Repositories.Abstracts;
 using Ratio_Lyrics.Web.Repositories.Implements;
 using Ratio_Lyrics.Web.Services.Abstraction;
@@ -91,6 +92,18 @@ namespace Ratio_Lyrics.Web.DependencyInjection
             builder.Logging.ClearProviders();
             builder.Logging.AddSerilog(seriLogConfig);
             return builder;
+        }
+
+        public static IServiceCollection AddGoogleCaptchaConfig(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<GoogleCaptchaOptions>(configuration.GetSection("GoogleCaptcha"));
+            services.AddScoped<ICaptchaService, GoogleCaptchaService>();
+            services.AddHttpClient(GoogleCaptchaConstants.GoogleCaptcha, x =>
+            {
+                x.BaseAddress = new Uri("https://www.google.com/");
+            });
+
+            return services;
         }
     }
 }

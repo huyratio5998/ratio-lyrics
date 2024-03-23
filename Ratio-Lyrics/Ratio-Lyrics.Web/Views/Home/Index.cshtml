@@ -1,12 +1,11 @@
 ﻿@using Ratio_Lyrics.Web.Helpers
-@inject IConfiguration Configuration
-@model SongViewModel
+@model HomeViewModel
 @{
     ViewData["Title"] = "Home";
-    var publicApiHost = Configuration["PublicApiUrl"].ToString() ?? "https://localhost:7186";
+    var publicApiHost = Model.PublicApiUrl;
 }
 <input type="hidden" value="@publicApiHost" id="public-api-host" />
-@if (Model != null && Model.Id != 0)
+@if (Model != null && Model.SongModel != null && Model.SongModel.Id != 0)
 {
     <div class="form-group row">
         <img src="/images/logos/ratiolyrics-logo-transparent.png" class="align-content-center mb-1" style="width:300px; height: auto" />
@@ -15,21 +14,21 @@
     <div id="searchResultDemoArea">        
     </div>
     <div id="songDetailArea">
-        <h2>@Model.DisplayName</h2>
+        <h2>@Model.SongModel.DisplayName</h2>
         <div>
-            <img src="@Model.ImageUrl" alt="@Model.DisplayName" style="height:300px;width:auto" />
+            <img src="@Model.SongModel.ImageUrl" alt="@Model.SongModel.DisplayName" style="height:300px;width:auto" />
         </div>
-        <p>Views: @StringHelper.FormatViews((int)Model.Views)</p>
-        @if (Model.Artists != null && Model.Artists.Any())
+        <p>Views: @StringHelper.FormatViews((int)Model.SongModel.Views)</p>
+        @if (Model.SongModel.Artists != null && Model.SongModel.Artists.Any())
         {
             <h3>Artist:</h3>
-            <p><i>@string.Join(", ", Model.Artists.Select(x => x.Name))</i></p>
+            <p><i>@string.Join(", ", Model.SongModel.Artists.Select(x => x.Name))</i></p>
         }
         <h3>Media Links:</h3>
-        @if (Model.MediaPlatformLinks != null && Model.MediaPlatformLinks.Any())
+        @if (Model.SongModel.MediaPlatformLinks != null && Model.SongModel.MediaPlatformLinks.Any())
         {
             <ul>
-                @foreach (var item in Model.MediaPlatformLinks)
+                @foreach (var item in Model.SongModel.MediaPlatformLinks)
                 {
                     if (string.IsNullOrEmpty(item.Link)) continue;
                     <li><a href="@item.Link" target="_blank">@item.Name</a></li>
@@ -39,7 +38,7 @@
 
         <div>
             <h3>Lyrics:</h3>
-            <div>@Html.Raw(Model.Lyric)</div>
+            <div>@Html.Raw(Model.SongModel.Lyric)</div>
         </div>
     </div>
 }
@@ -58,5 +57,23 @@ else
 <div id="formCreateSongArea">
     <partial name="/Views/Home/Partial/Create.cshtml" model="Model" />
 </div>
+
+@if (Model != null && Model.CaptchaSettings.IsEnabled)
+{
+    @if (Model.CaptchaSettings.IsVersion2())
+    {
+        <script src="https://www.google.com/recaptcha/api.js" defer></script>
+    }
+
+    @if (Model.CaptchaSettings.IsVersion3())
+    {
+        <script src="https://www.google.com/recaptcha/api.js?render=@Model.CaptchaSettings.SiteKey"></script>
+        <script>
+            function onSubmit(token) {
+                document.getElementById("js_contribute-song-form").submit();
+            }
+        </script>
+    }
+}
 
 <script type="module" defer src="@Url.Content("~/js/home.js")"></script>
