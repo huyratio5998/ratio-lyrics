@@ -39,7 +39,8 @@ namespace Ratio_Lyrics.Web.Configurations.Mapper
                 .ForMember(x=>x.Views, y=>y.MapFrom(t=>t.Lyric.Views))
                 .ForMember(x=>x.Artists, y=>y.MapFrom(t=>t.SongArtists))                
                 .ForMember(x => x.ImageUrl, y => y.MapFrom(t => t.Image))
-                .ForMember(x => x.Image, y => y.Ignore()); ;            
+                .ForMember(x => x.Image, y => y.Ignore())
+                .ForMember(x => x.ReleaseDateDisplay, y => y.MapFrom(t => t.ReleaseDate.ToString("dd-MM-yyyy"))); 
             CreateMap<SongViewModel, Song>()
                 .ForMember(x=>x.Image, y=>y.MapFrom(t=>t.ImageUrl))
                 .ForMember(x=>x.Lyric, y=>y.Ignore())

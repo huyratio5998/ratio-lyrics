@@ -7,34 +7,67 @@
 <input type="hidden" value="@publicApiHost" id="public-api-host" />
 @if (Model != null && Model.SongModel != null && Model.SongModel.Id != 0)
 {
-    <div class="form-group row">
-        <img src="/images/logos/ratiolyrics-logo-transparent.png" class="align-content-center mb-1" style="width:300px; height: auto" />
-        <input type="text" id="input-search-songs" autocomplete="off" class="form-control col-6" />
-    </div>
-    <div id="searchResultDemoArea">        
+    <div class="search-bar-area">
+        <div class="form-group row mb-1">
+            <input placeholder="Search songs" type="text" id="input-search-songs" autocomplete="off" class="form-control col-6" />
+        </div>
+        <div id="searchResultDemoArea">
+        </div>
     </div>
     <div id="songDetailArea">
-        <h2>@Model.SongModel.DisplayName</h2>
         <div>
-            <img src="@Model.SongModel.ImageUrl" alt="@Model.SongModel.DisplayName" style="height:300px;width:auto" />
+            <h1>@Model.SongModel.DisplayName</h1>
         </div>
-        <p>Views: @StringHelper.FormatViews((int)Model.SongModel.Views)</p>
-        @if (Model.SongModel.Artists != null && Model.SongModel.Artists.Any())
-        {
-            <h3>Artist:</h3>
-            <p><i>@string.Join(", ", Model.SongModel.Artists.Select(x => x.Name))</i></p>
-        }
-        <h3>Media Links:</h3>
-        @if (Model.SongModel.MediaPlatformLinks != null && Model.SongModel.MediaPlatformLinks.Any())
-        {
-            <ul>
-                @foreach (var item in Model.SongModel.MediaPlatformLinks)
-                {
-                    if (string.IsNullOrEmpty(item.Link)) continue;
-                    <li><a href="@item.Link" target="_blank">@item.Name</a></li>
-                }
-            </ul>
-        }
+        <div class="row">
+            <div class="col-md-6">
+                <div>
+                    <img src="@Model.SongModel.ImageUrl" alt="@Model.SongModel.DisplayName" style="height:auto;width:100%" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div>
+                    @if (Model.SongModel.Artists != null && Model.SongModel.Artists.Any())
+                    {
+                        <p><span class="h4">Artist: </span><span><i>@string.Join(", ", Model.SongModel.Artists.Select(x => x.Name))</i></span> </p>
+                    }
+                </div>
+                <div>
+                    @if (!string.IsNullOrWhiteSpace(Model.SongModel.Description))
+                    {
+                        string additionContent = Model.SongModel.Description.Length > 200 ? "..." : "";
+                        int descriptionLength = Model.SongModel.Description.Length > 200 ? 200 : Model.SongModel.Description.Length;
+                        <p>@Model.SongModel.Description.Substring(0, descriptionLength)@additionContent</p>
+                    }
+                </div>
+                <div>
+                    <h4>Media Links:</h4>
+                    @if (Model.SongModel.MediaPlatformLinks != null && Model.SongModel.MediaPlatformLinks.Any())
+                    {
+                        <ul>
+                            @foreach (var item in Model.SongModel.MediaPlatformLinks)
+                            {
+                                if (string.IsNullOrEmpty(item.Link)) continue;
+                                <li>
+                                    <a href="@item.Link" target="_blank">
+                                        <img src="@item.Image" alt="@item.Name" style="height:20px" />
+                                        @item.Name
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+                <div>
+                    @if (Model.SongModel.ReleaseDate != DateTime.MinValue)
+                    {
+                        <div><b>Release Date</b><i>(dd-mm-yyyy): </i><span>@Model.SongModel.ReleaseDate.ToString("dd-MM-yyyy")</span></div>
+                    }
+                </div>
+                <div>
+                    <p><b>Views: </b><span>@StringHelper.FormatViews((int)Model.SongModel.Views)</span></p>
+                </div>
+            </div>
+        </div>
 
         <div>
             <h3>Lyrics:</h3>
@@ -44,11 +77,12 @@
 }
 else
 {
-    <div class="form-group row">
-        <img src="/images/logos/ratiolyrics-logo-transparent.png" class="align-content-center mb-1" style="width:300px; height: auto" />
-        <input type="text" id="input-search-songs" autocomplete="off" class="form-control col-6" />
-    </div>
-    <div id="searchResultDemoArea">        
+    <div class="search-bar-area">
+        <div class="form-group row mb-1">
+            <input placeholder="Search songs" type="text" id="input-search-songs" autocomplete="off" class="form-control col-6" />
+        </div>
+        <div id="searchResultDemoArea">
+        </div>
     </div>
     <div id="songDetailArea"></div>
 
@@ -70,6 +104,24 @@ else
         <script src="https://www.google.com/recaptcha/api.js?render=@Model.CaptchaSettings.SiteKey"></script>
         <script>
             function onSubmit(token) {
+                const contributeForm = document.querySelector("#js_contribute-song-form");
+                const contributeFormData = new FormData(contributeForm);
+                const errorMessageEl = document.querySelector(
+                    ".js_contributeSong-error-message"
+                );
+                if (
+                    !contributeFormData.get("Name") ||
+                    !contributeFormData.get("Lyrics")
+                ) {
+                    DisplayMessageInMoment(
+                        errorMessageEl,
+                        "Name or Lyrics can not be empty!",
+                        "alert-danger",
+                        5000
+                    );
+                    return;
+                }
+
                 document.getElementById("js_contribute-song-form").submit();
             }
         </script>

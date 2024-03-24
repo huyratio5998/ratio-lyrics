@@ -1,11 +1,9 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using Ratio_Lyrics.Web.Models;
 using Ratio_Lyrics.Web.Services.Abstraction;
 using Ratio_Lyrics.Web.Services.Implements;
-using System;
 
 namespace Ratio_Lyrics.Api.Controllers.V1
 {
@@ -19,7 +17,7 @@ namespace Ratio_Lyrics.Api.Controllers.V1
         private readonly ISongService _songService;        
         private readonly IServiceProvider _serviceProvider;
         private RunUpdateViewsBackgroundTask _updateViewTask;
-        private const int SearchNumberDefault = 5;
+        private const int SearchNumberDefault = 6;
         private const int MaxOrderTimeExecuteMinutes = 5;
 
         public SongController(ILogger<SongController> logger, ISongService songService, IServiceProvider serviceProvider)

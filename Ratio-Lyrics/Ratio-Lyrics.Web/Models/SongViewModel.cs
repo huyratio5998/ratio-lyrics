@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ratio_Lyrics.Web.Models
 {
@@ -15,7 +16,9 @@ namespace Ratio_Lyrics.Web.Models
         public IFormFile? Image { get; set; }
         public string? ImageUrl { get; set; }
         public string? Background { get; set; }
-        public DateTime ReleaseDate { get; set; }
+        [DataType(DataType.Date)]        
+        public DateTime ReleaseDate { get; set; } =  DateTime.Now;
+        public string? ReleaseDateDisplay { get; set; }
         public string? SearchKey { get; set; }
 
         //Form create

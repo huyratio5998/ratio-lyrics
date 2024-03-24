@@ -43,3 +43,14 @@ ImageChangeAction(images);
 tinymce.init({
   selector: "textarea",
 });
+
+const DisplayMessageInMoment = (element, message, className, timeOut) => {
+  if (!element) return;
+
+  element.innerHTML = message;
+  if (className) element.classList.add(className);
+  setTimeout(() => {
+    element.innerHTML = "";
+    if (className) element.classList.remove(className);
+  }, timeOut);
+};

@@ -94,12 +94,18 @@ const BuildSongSearchCardItemHtml = (song) => {
   const imageBlock =
     song.imageUrl == ""
       ? ""
-      : `<img src="${song.imageUrl}" style="height:50px;width:90px" alt="${song.name}">`;
+      : `<img src="${song.imageUrl}" style="height:50px;width:90px;margin: 10px auto;" alt="${song.name}">`;
   let songItem = `
-  <div class="js_selectSearchResultEvent search-item" data-id=${song.id}>
-    <h3>${song.displayName}</h3>
-    ${imageBlock}
-    <p>${artist}</p>  
+  <div class="js_selectSearchResultEvent search-item row" style="border-bottom: ridge;" data-id=${song.id}>
+      <div class="row" style="height:70px">
+      <div class="col-4 col-md-2">
+      ${imageBlock}
+      </div>
+      <div class="col-8 col-md-10">
+        <h5>${song.displayName}</h5>
+        <p>${artist}</p>
+      </div>
+    </div> 
   </div>
   `;
 
@@ -126,10 +132,24 @@ const BuildArtistBlockHtml = (artistArray) => {
   let artist = artistArray.map((el) => el.name).join(", ");
   let artistBlockHtml = ``;
   if (artist != "")
-    artistBlockHtml += `<h3>Artist:</h3>
-  <p><i>${artist}</i></p> `;
+    artistBlockHtml += `<p><span class="h4">Artist: </span><span><i>${artist}</i></span> </p>`;
 
   return artistBlockHtml;
+};
+
+const BuildSongDescriptionBlockHtml = (description) => {
+  let result = ``;
+  const desctiptionLength = description.length;
+  let descriptionDisplay = description.substring(
+    0,
+    desctiptionLength > 200 ? 200 : desctiptionLength
+  );
+  if (description != "")
+    result += `<p>${descriptionDisplay}${
+      desctiptionLength > 200 ? `...` : ``
+    }</p>`;
+
+  return result;
 };
 
 const BuildMediaPlatformBlockHtml = (mediaPlatformLinks) => {
@@ -137,12 +157,20 @@ const BuildMediaPlatformBlockHtml = (mediaPlatformLinks) => {
   mediaPlatformLinks
     .filter((x) => x.link != "")
     .forEach((el) => {
-      mediaPlatformItems += `<li><a href="${el.link}" target="_blank">${el.name}</a></li>`;
+      mediaPlatformItems += `<li>
+      <a href="${el.link}" target="_blank">
+          <img src="${el.image}" alt="${el.name}" style="height:20px" />
+          ${el.name}
+      </a>
+  </li>`;
     });
 
   let mediaPlatformBlockHtml = ``;
   if (mediaPlatformItems != "")
-    mediaPlatformBlockHtml += `<h3>Media Links:</h3><ul>${mediaPlatformItems}</ul>`;
+    mediaPlatformBlockHtml += `<div>
+                                <h4>Media Links:</h4>
+                                <ul>${mediaPlatformItems}</ul>
+                              </div>`;
 
   return mediaPlatformBlockHtml;
 };
@@ -152,13 +180,33 @@ const BuildSongDetailHtml = (song) => {
   let mediaPlatformBlockHtml = BuildMediaPlatformBlockHtml(
     song.mediaPlatformLinks
   );
-  let result = `<h2>${song.displayName}</h2>
-  <div>
-      <img src="${song.imageUrl}" alt="${song.name}" style="height:300px;width:auto" />
-  </div>    
-  <p>Views: ${song.views}</p>      
-  ${artistBlockHtml}
-  ${mediaPlatformBlockHtml}    
+  let description = BuildSongDescriptionBlockHtml(song.description);
+  let result = `<div>
+  <h1>${song.displayName}</h1>  
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+        <div>
+          <img src="${song.imageUrl}" alt="${
+    song.name
+  }" style="height:auto;width:100%" />
+        </div>
+    </div>
+    <div class="col-md-6">
+        ${artistBlockHtml}
+        ${description}
+        ${mediaPlatformBlockHtml}            
+        <div>${
+          song.releaseDateDisplay != ""
+            ? `<div><b>Release Date</b><i>(dd-mm-yyyy): </i><span>${song.releaseDateDisplay}</span></div>`
+            : ``
+        }          
+        </div>
+        <div>
+            <p><b>Views: </b><span>${song.views}</span></p>
+        </div>
+    </div>
+</div>        
   <div>
       <h3>Lyrics:</h3>
       <div>${song.lyric}</div>
@@ -232,7 +280,40 @@ const ContributeNewSongEvent = () => {
 
   btnContributeSong.addEventListener("click", () => {
     document.forms[0].reset();
+    const imagePreview = document.querySelector(".js_img_changeTarget img");
+    if (!imagePreview) return;
+
+    imagePreview.src = `/images/songs/no-song.png`;
+  });
+};
+
+const SaveSongContributeEvent = () => {
+  const btnContributeSong = document.querySelector(
+    ".js_btn-save-song-contribution"
+  );
+  const contributeForm = document.querySelector("#js_contribute-song-form");
+  if (!btnContributeSong || !contributeForm) return;
+
+  const contributeFormData = new FormData(contributeForm);
+  const errorMessageEl = document.querySelector(
+    ".js_contributeSong-error-message"
+  );
+  btnContributeSong.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    if (!contributeFormData.get("Name") || !contributeFormData.get("Lyrics")) {
+      DisplayMessageInMoment(
+        errorMessageEl,
+        `Name or Lyrics can not be empty!`,
+        "alert-danger",
+        5000
+      );
+      return;
+    }
+
+    contributeForm.submit();
   });
 };
 
 SearchSongEvent();
+SaveSongContributeEvent();

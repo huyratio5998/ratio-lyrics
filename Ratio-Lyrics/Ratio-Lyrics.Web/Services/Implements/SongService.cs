@@ -525,6 +525,8 @@ namespace Ratio_Lyrics.Web.Services.Implements
 
         public string BuildSearchKey(SongViewModel newSong)
         {
+            if (string.IsNullOrWhiteSpace(newSong.Name) || string.IsNullOrWhiteSpace(newSong.Lyric)) return string.Empty;
+
             string nameFormated = StringHelper.RemoveSign4VietnameseString(newSong.Name);
             string nameNoSpace = newSong.Name.Replace(" ", "");
             string nameFormatedNoSpace = nameFormated.Replace(" ", "");

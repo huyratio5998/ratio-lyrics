@@ -48,8 +48,9 @@ namespace Ratio_Lyrics.Web.Services.Implements
             try
             {
                 _logger.LogInformation($"Start cache service. Key: {key}");
-                T? result;                
-                var cacheResult = await _distributedCache.GetAsync(key);                
+                T? result;
+
+                var cacheResult = await _distributedCache.GetAsync(key);
                 if (cacheResult != null)
                 {
                     _logger.LogInformation("Get cache data");
