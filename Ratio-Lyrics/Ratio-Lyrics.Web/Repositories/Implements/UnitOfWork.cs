@@ -10,12 +10,14 @@ namespace Ratio_Lyrics.Web.Repositories.Implements
         private readonly RatioLyricsDBContext _context;
         private Dictionary<Type, object> _repositories;
         private IDbContextTransaction _transaction;
-        private bool disposedValue = false;
+        public IUserRepository UserRepository { get; private set; }
+        private bool disposedValue = false;        
 
         public UnitOfWork(RatioLyricsDBContext context)
         {
             _context = context;
             _repositories = new Dictionary<Type, object>();
+            UserRepository = new UserRepository(context);
         }
 
         public async Task CreateTransactionAsync()

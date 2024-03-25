@@ -37,6 +37,7 @@ namespace Ratio_Lyrics.Web.Configurations.Mapper
             CreateMap<Song, SongViewModel>()
                 .ForMember(x=>x.Lyric, y=>y.MapFrom(t=>t.Lyric.Lyric))
                 .ForMember(x=>x.Views, y=>y.MapFrom(t=>t.Lyric.Views))
+                .ForMember(x=>x.ContributedBy, y=>y.MapFrom(t=>t.Lyric.ContributedBy))
                 .ForMember(x=>x.Artists, y=>y.MapFrom(t=>t.SongArtists))                
                 .ForMember(x => x.ImageUrl, y => y.MapFrom(t => t.Image))
                 .ForMember(x => x.Image, y => y.Ignore())

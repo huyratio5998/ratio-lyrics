@@ -11,5 +11,6 @@ namespace Ratio_Lyrics.Web.Repositories.Abstracts
         Task RollbackAsync();
 
         IBaseRepository<T> GetRepository<T>() where T : BaseEntity;
+        public IUserRepository UserRepository { get; }
     }
 }

@@ -1,11 +1,19 @@
 using Microsoft.AspNetCore.Identity;
 using Ratio_Lyrics.Web.Data;
 using Ratio_Lyrics.Web.DependencyInjection;
+using Ratio_Lyrics.Web.Entities;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddSerilogConfig();
+
+//google authen
+builder.Services.AddExternalAuthenticationConfig(builder.Configuration);
+builder.Services.AddSession(config => {
+    config.IOTimeout = TimeSpan.FromSeconds(5000);
+});
+//builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 //distributed cache
 builder.Services.AddDistributedMemoryCache();
@@ -21,6 +29,11 @@ builder.Services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(c =
 
 // Add services to the container.
 builder.Services.AddRatioLyricsDBContext(builder.Configuration);
+builder.Services.AddIdentity<RatioLyricUsers, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<RatioLyricsDBContext>()
+    .AddDefaultUI()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddFluentValidationConfig();
 builder.Services.AddConfigurationAutoMapper();
 builder.Services.AddApplicationRepositoriesConfig();
@@ -28,8 +41,6 @@ builder.Services.AddApplicationServicesConfig();
 builder.Services.AddHttpClientFactoryConfig();
 builder.Services.AddGoogleCaptchaConfig(builder.Configuration);
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<RatioLyricsDBContext>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -51,7 +62,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
 
 app.MapControllerRoute(
     name: "areas",

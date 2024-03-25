@@ -145,7 +145,8 @@ namespace Ratio_Lyrics.Web.Services.Implements
             {
                 Lyric = newSong.Lyric,
                 Views = 0,
-                SongId = newSong.Id
+                SongId = newSong.Id,
+                ContributedBy = string.Empty
             });
             _logger.LogInformation($"Save song lyrics");
         }
@@ -428,6 +429,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             if (currentLyrics == null) return;
 
             currentLyrics.Lyric = newSong.Lyric;
+            currentLyrics.ContributedBy = newSong.ContributedBy;
             _logger.LogInformation($"Update song lyrics");
         }
 

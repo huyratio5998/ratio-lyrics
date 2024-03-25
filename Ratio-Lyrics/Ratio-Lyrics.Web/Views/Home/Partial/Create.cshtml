@@ -1,6 +1,11 @@
 ﻿@using System.Text.Json
 @model HomeViewModel
 
+@{
+    Model.SongModel.Name = string.Empty;
+    Model.SongModel.Lyric = string.Empty;
+    Model.SongModel.ReleaseDate = DateTime.Now;
+}
 <div id="contribute-song-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -15,7 +20,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="SongModel.Name" class="control-label">Name*</label>
-                                <input asp-for="SongModel.Name" class="form-control" />
+                                <input asp-for="SongModel.Name" class="js_ratio-name form-control" />
                                 <span asp-validation-for="SongModel.Name" class="text-danger"></span>
                             </div>
                             <div class="form-group">

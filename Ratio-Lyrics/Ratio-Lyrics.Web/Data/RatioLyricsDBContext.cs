@@ -5,7 +5,7 @@ using Ratio_Lyrics.Web.Entities;
 
 namespace Ratio_Lyrics.Web.Data
 {
-    public class RatioLyricsDBContext : IdentityDbContext
+    public class RatioLyricsDBContext : IdentityDbContext<RatioLyricUsers>
     {
         public RatioLyricsDBContext(DbContextOptions<RatioLyricsDBContext> options)
             : base(options)
@@ -33,5 +33,6 @@ namespace Ratio_Lyrics.Web.Data
         public DbSet<SongLyric> SongLyrics { get; set; }
         public DbSet<SongMediaPlatform> SongMediaPlatforms { get; set; }
         public DbSet<SongArtist> SongArtists { get; set; }
+        public DbSet<RatioLyricUsers> RatioLyricUsers { get; set; }
     }
 }
