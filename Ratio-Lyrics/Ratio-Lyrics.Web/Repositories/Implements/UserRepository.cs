@@ -19,5 +19,9 @@ namespace Ratio_Lyrics.Web.Repositories.Implements
         {
             return isTracking ? _dbSet : _dbSet.AsNoTracking();
         }
+        public async Task<RatioLyricUsers?> GetShopUser(string id)
+        {
+            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id.Equals(id));
+        }
     }
 }

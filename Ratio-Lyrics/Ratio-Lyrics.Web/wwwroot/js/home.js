@@ -129,8 +129,10 @@ const ResetSongSearchBar = () => {
 };
 //song detail
 const BuildArtistBlockHtml = (artistArray) => {
-  let artist = artistArray.map((el) => el.name).join(", ");
   let artistBlockHtml = ``;
+  if (!artistArray) return artistBlockHtml;
+
+  let artist = artistArray.map((el) => el.name).join(", ");
   if (artist != "")
     artistBlockHtml += `<p><span class="h4">Artist: </span><span><i>${artist}</i></span> </p>`;
 
@@ -139,6 +141,7 @@ const BuildArtistBlockHtml = (artistArray) => {
 
 const BuildSongDescriptionBlockHtml = (description) => {
   let result = ``;
+  if (!description) return result;
   const desctiptionLength = description.length;
   let descriptionDisplay = description.substring(
     0,
@@ -154,6 +157,8 @@ const BuildSongDescriptionBlockHtml = (description) => {
 
 const BuildMediaPlatformBlockHtml = (mediaPlatformLinks) => {
   let mediaPlatformItems = ``;
+  if (!mediaPlatformLinks) return mediaPlatformItems;
+
   mediaPlatformLinks
     .filter((x) => x.link != "")
     .forEach((el) => {
@@ -214,7 +219,7 @@ const BuildSongDetailHtml = (song) => {
               <i>
                   ${
                     song.contributedBy
-                      ? `contributed by${song.contributedBy}`
+                      ? `(contributed by ${song.contributedBy})`
                       : ""
                   }
               </i>

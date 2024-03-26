@@ -1,4 +1,5 @@
 ﻿@using System.Text.Json
+@inject ILayoutSettingsViewModel layoutSetting
 @model HomeViewModel
 
 @{
@@ -70,6 +71,7 @@
                             <textarea asp-for="SongModel.Lyric" class="form-control"></textarea>
                             <span asp-validation-for="SongModel.Lyric" class="text-danger"></span>
                         </div>
+                        <input type="hidden" asp-for="SongModel.ContributedBy" value="@Model.SongModel.ContributedBy" />
                         <input type="hidden" asp-for="SongModel.MediaLinksForm" value="@JsonSerializer.Serialize(Model.SongModel.MediaPlatformLinks)" />
                     </div>
 

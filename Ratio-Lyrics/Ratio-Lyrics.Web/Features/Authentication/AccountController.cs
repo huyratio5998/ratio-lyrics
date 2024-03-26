@@ -1,15 +1,13 @@
-﻿using Asp.Versioning;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ratio_Lyrics.Web.Constants;
 using Ratio_Lyrics.Web.Services.Abstraction;
 
-namespace Ratio_Lyrics.Api.Controllers.V1
+namespace Ratio_Lyrics.Web.Features.Authentication
 {
     [Authorize]
     [ApiController]
-    [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/[controller]/[action]")]
+    [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
         private readonly ILogger _logger;
@@ -32,6 +30,7 @@ namespace Ratio_Lyrics.Api.Controllers.V1
 
         [AllowAnonymous]
         [Route("externalLoginCallback")]
+        [HttpGet]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null)
         {
             var result = await _userService.ExternalLoginCallback();            
@@ -42,6 +41,8 @@ namespace Ratio_Lyrics.Api.Controllers.V1
 
         [Authorize]
         [Route("logout")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]        
         public async Task<IActionResult> Logout()
         {
             var logoutResponse = await _userService.UserLogout();
@@ -52,6 +53,8 @@ namespace Ratio_Lyrics.Api.Controllers.V1
 
         [Route("authenticated")]
         [AllowAnonymous]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]        
         public async Task<IActionResult> CheckAuthenticated()
         {
             try

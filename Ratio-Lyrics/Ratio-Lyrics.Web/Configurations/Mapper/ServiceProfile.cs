@@ -50,6 +50,9 @@ namespace Ratio_Lyrics.Web.Configurations.Mapper
 
             CreateMap(typeof(PagedResponse<>), typeof(PagedResponse<>));
 
+            //user
+            CreateMap<RatioLyricUsers, UserViewModel>();
+
             //admin
             CreateMap<PagedResponse<SongViewModel>, ListSongsAdminViewModel>();
 

@@ -13,8 +13,8 @@ namespace Ratio_Lyrics.Web.Services.Implements
 {
     public class UserService : IUserService
     {
-        private readonly UserManager<RatioLyricUsers> _userManager;
         private readonly SignInManager<RatioLyricUsers> _signInManager;
+        private readonly UserManager<RatioLyricUsers> _userManager;
         private readonly IUserStore<RatioLyricUsers> _userStore;
         private readonly IUserEmailStore<RatioLyricUsers> _emailStore;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -26,17 +26,17 @@ namespace Ratio_Lyrics.Web.Services.Implements
 
         public UserService(SignInManager<RatioLyricUsers> signInManager,
             UserManager<RatioLyricUsers> userManager,
-            IUserStore<RatioLyricUsers> userStore, 
-            IUserEmailStore<RatioLyricUsers> emailStore,
+            IUserStore<RatioLyricUsers> userStore,             
             RoleManager<IdentityRole> roleManager, 
-            ILogger logger, IMapper mapper, 
+            ILogger<UserService> logger,
+            IMapper mapper, 
             IUnitOfWork unitOfWork, 
             ICommonService commonService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _userStore = userStore;
-            _emailStore = emailStore;
+            _emailStore = GetEmailStore(); ;
             _roleManager = roleManager;
             _logger = logger;
             _mapper = mapper;
@@ -179,6 +179,23 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 UserName = request.UserName,
                 Status = "Success"
             };
+        }
+
+        private IUserEmailStore<RatioLyricUsers> GetEmailStore()
+        {
+            if (!_userManager.SupportsUserEmail)
+            {
+                throw new NotSupportedException("The default UI requires a user store with email support.");
+            }
+            return (IUserEmailStore<RatioLyricUsers>)_userStore;
+        }
+
+        public async Task<UserViewModel?> GetUserById(string id)
+        {
+            var user = await _userRepository.GetShopUser(id);
+            if (user == null) return null;
+
+            return _mapper.Map<UserViewModel>(user);
         }
     }
 }

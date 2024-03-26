@@ -1,10 +1,14 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Ratio_Lyrics.Web.Entities
+@model ILayoutSettingsViewModel
 @inject SignInManager<RatioLyricUsers> SignInManager
 @inject UserManager<RatioLyricUsers> UserManager
 
+@{
+    var isSignIn = SignInManager.IsSignedIn(User);
+}
 <ul class="navbar-nav">
-    @if (SignInManager.IsSignedIn(User))
+    @if (isSignIn)
     {
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
@@ -16,30 +20,33 @@
         </li>
     }
     else
-    {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-        </li>
+    {        
         <li class="nav-item">
             <a class="nav-link text-dark" href="#" data-bs-toggle="modal" data-bs-target="#external-login-modal">Login</a>
         </li>
     }
 </ul>
 
-
-<div id="external-login-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div>
-                    <img src="/images/logos/ratiolyrics-logo-transparent.png" style="width:300px; height: auto" />
-                </div>
-                <div>
-                    <button type="button" class="js_loginWithGoogle login-with-google-btn">
-                        Sign in with Google
-                    </button>
+@if (!isSignIn)
+{
+    var googleLoginUrl = $"/api/account/externalLogin?returnUrl={Model.CurrentPath()}";
+    <div id="external-login-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="p-5" style="background: #dceefb;">
+                        <img src="/images/logos/ratiolyrics-logo-transparent.png" style="width:100%; height: auto" />
+                    </div>
+                    <div class="p-1" style="text-align:center">
+                        <form method="post" action="@googleLoginUrl">
+                            <button type="submit" class="js_loginWithGoogle login-with-google-btn">
+                                Sign in with Google
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+}
+

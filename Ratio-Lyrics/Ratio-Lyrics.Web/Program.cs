@@ -13,7 +13,7 @@ builder.Services.AddExternalAuthenticationConfig(builder.Configuration);
 builder.Services.AddSession(config => {
     config.IOTimeout = TimeSpan.FromSeconds(5000);
 });
-//builder.Services.AddRouting(options => options.LowercaseUrls = true);
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 //distributed cache
 builder.Services.AddDistributedMemoryCache();

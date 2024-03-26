@@ -33,7 +33,8 @@ namespace Ratio_Lyrics.Web.DependencyInjection
         public static IServiceCollection AddApplicationServicesConfig(this IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<ICommonService, CommonService>();            
+            services.AddSingleton<ICommonService, CommonService>();
+            services.AddScoped<ILayoutSettingsViewModel, LayoutSettingsViewModel>();
 
             services.AddScoped<IArtistService, ArtistService>();
             services.AddScoped<IMediaPlatformService, MediaPlatformService>();

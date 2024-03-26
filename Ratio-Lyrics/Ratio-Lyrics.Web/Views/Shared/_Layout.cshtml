@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@inject ILayoutSettingsViewModel layoutSetting
+<!DOCTYPE html>
 <html lang="en" timestamp="@DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss")">
 <head>
     <meta charset="utf-8" />
@@ -44,7 +45,7 @@
                             <a class="nav-link text-dark" asp-area="Admin" asp-controller="Song" asp-action="Index">Song Manage</a>
                         </li>
                     </ul>
-                    <partial name="_LoginPartial" />
+                    <partial name="_LoginPartial" model="@layoutSetting" />
                 </div>
             </div>
         </nav>

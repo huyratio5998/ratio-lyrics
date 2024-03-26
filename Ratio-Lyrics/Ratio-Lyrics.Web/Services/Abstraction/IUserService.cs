@@ -7,6 +7,7 @@ namespace Ratio_Lyrics.Web.Services.Abstraction
     {
         ChallengeResult ExternalLogin(string provider, string redirectUrl);
         Task<LoginResponseViewModel> ExternalLoginCallback();
+        Task<UserViewModel?> GetUserById(string id);
         Task<bool> UserLogout();
     }
 }
