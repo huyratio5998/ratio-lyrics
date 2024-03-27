@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Ratio_Lyrics.Web.Models.Enums;
 
 namespace Ratio_Lyrics.Web.Areas.Admin.Models
 {
@@ -9,7 +10,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Models
         public string? FilterItems { get; set; }
 
         [BindProperty(Name = "sortType")]
-        public SortingEnum SortType { get; set; }
+        public SortingType SortType { get; set; }
 
         [BindProperty(Name = "isSelectPreviousItems")]
         public bool IsSelectPreviousItems { get; set; }
@@ -19,15 +20,5 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Models
 
         [BindProperty(Name = "pageSize")]
         public int PageSize { get; set; }
-    }
-
-    public enum SortingEnum
-    {
-        Default,
-        Oldest,
-        RecentUpdate,
-        Name,
-        LowtoHeigh,
-        HeightoLow
-    }
+    }    
 }
