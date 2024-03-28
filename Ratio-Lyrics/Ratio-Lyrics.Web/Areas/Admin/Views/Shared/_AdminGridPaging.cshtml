@@ -1,20 +1,27 @@
 ﻿@using Ratio_Lyrics.Web.Areas.Admin.Models
-@model BaseAdminPagingViewModel
+@using Ratio_Lyrics.Web.Helpers
+@model BaseListingPageViewModel
 
-@if (Model == null || Model.TotalPages <= 1) return;
+@if (Model == null || Model.TotalPage <= 1) return;
 
 @{
     // params pass
-    var parms = new Dictionary<string, string>();    
+    var parms = new Dictionary<string, string>();
     var area = ViewBag.Area;
     var controller = ViewBag.Controller;
-    var action = ViewBag.Action;           
-    if (!string.IsNullOrWhiteSpace(Model.SearchText )) parms.Add("searchText", Model.SearchText);
-    if (Model.OrderBy != OrderType.Asc) parms.Add("orderBy", Model.OrderBy.ToString());
+    var action = ViewBag.Action;
+    var parentId = ViewBag.ParentId;
+
+    var filterItems = Model.FilterItems.FilterItemToJson();
+    var sortType = Model.SortType;
+    if (filterItems != null) parms.Add("filterItems", filterItems);
+    if (sortType != Ratio_Lyrics.Web.Models.Enums.SortingType.Default) parms.Add("sortType", sortType.ToString());
+    if (!string.IsNullOrWhiteSpace(parentId)) parms.Add("parentId", parentId);
+
 
     // setting UI
     var disablePrevious = Model.PageIndex == 1 ? "disabled" : "";
-    var disableNext = Model.PageIndex == Model.TotalPages ? "disabled" : "";
+    var disableNext = Model.PageIndex == Model.TotalPage ? "disabled" : "";
 
     int maxContinuesPage = 10;
     int stepEachGap = 2;
@@ -34,14 +41,14 @@
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
-        @for (var i = 1; i <= Model.TotalPages; i++)
+        @for (var i = 1; i <= Model.TotalPage; i++)
         {
             if (i == 1) parms.Remove("page");
             else parms["page"] = i.ToString();
 
-            if (Model.TotalPages > maxContinuesPage)
+            if (Model.TotalPage > maxContinuesPage)
             {
-                if (i > 1 && i < Model.TotalPages)
+                if (i > 1 && i < Model.TotalPage)
                 {
                     if (!generateDotBefore && i < Model.PageIndex - 2)
                     {
@@ -50,13 +57,13 @@
                             <a class="page-link">...</a>
                         </li>
                     }
-                    else if ((Model.PageIndex - stepEachGap <= i && i <= Model.PageIndex + stepEachGap) || (Model.PageIndex + 2 < rangeLimit && i <= rangeLimit) || (Model.PageIndex - 2 > Model.TotalPages - rangeLimit && i > Model.TotalPages - rangeLimit))
+                    else if ((Model.PageIndex - stepEachGap <= i && i <= Model.PageIndex + stepEachGap) || (Model.PageIndex + 2 < rangeLimit && i <= rangeLimit) || (Model.PageIndex - 2 > Model.TotalPage - rangeLimit && i > Model.TotalPage - rangeLimit))
                     {
                         <li class="page-item @(i == Model.PageIndex ? "active" : "")">
                             <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link">@i</a>
                         </li>
                     }
-                    else if (!generateDotAfter && Model.PageIndex + 2 < i && i < Model.TotalPages - 1)
+                    else if (!generateDotAfter && Model.PageIndex + 2 < i && i < Model.TotalPage - 1)
                     {
                         generateDotAfter = true;
                         <li class="page-item">

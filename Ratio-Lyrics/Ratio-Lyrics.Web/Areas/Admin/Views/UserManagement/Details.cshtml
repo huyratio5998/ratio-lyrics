@@ -1,10 +1,10 @@
-﻿@using RatioShop.Areas.Admin.Models.User
+﻿@using Ratio_Lyrics.Web.Areas.Admin.Models.User
 
-@model BaseUserViewModel
+@model UserViewModel
 
 @{
     ViewData["Title"] = "Details";
-    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <h1>Details</h1>
@@ -14,10 +14,10 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.FullName)
+            @Html.DisplayNameFor(model => model.DisplayName)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.FullName)
+            @Html.DisplayFor(model => model.DisplayName)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PhoneNumber)
@@ -30,13 +30,7 @@
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class="col-sm-2">
-            Address
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.FullShippingAddress)
-        </dd>
+        </dd>        
     </dl>
 </div>
 <div>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ratio_Lyrics.Web.Data;
 
@@ -11,9 +12,11 @@ using Ratio_Lyrics.Web.Data;
 namespace Ratio_Lyrics.Web.Data.Migrations
 {
     [DbContext(typeof(RatioLyricsDBContext))]
-    partial class RatioLyricsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240328073928_add column isclient")]
+    partial class addcolumnisclient
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

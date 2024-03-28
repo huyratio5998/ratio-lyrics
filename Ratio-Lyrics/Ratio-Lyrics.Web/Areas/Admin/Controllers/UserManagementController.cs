@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Ratio_Lyrics.Web.Areas.Admin.Models;
 using Ratio_Lyrics.Web.Areas.Admin.Models.User;
 using Ratio_Lyrics.Web.Helpers;
@@ -10,14 +9,14 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Route("admin/userManagements")]
-    [Authorize(Roles = "Admin,Manager,SuperAdmin")]
-    public class UserManagementsController : Controller
+    //[Authorize(Roles = "Admin,Manager,SuperAdmin")]
+    public class UserManagementController : Controller
     {
         private readonly IUserService _userService;
 
         private const int pageSizeClientDesktopDefault = 12;
         private const int pageSizeClientMobileDefault = 8;
-        public UserManagementsController(IUserService userService)
+        public UserManagementController(IUserService userService)
         {
             _userService = userService;
         }
@@ -27,6 +26,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
         public IActionResult FilterOrder(string actionRedirect, string? name, string? phoneNumber, string? email, int? page = 1)
         {
             var listFilterItems = new List<FacetFilterItem>();
+            listFilterItems.Add(new FacetFilterItem() { FieldName = "IsClientUser", Type = FilterType.Bool.ToString(), Value = "true" });
             if (!string.IsNullOrWhiteSpace(name))
                 listFilterItems.Add(new FacetFilterItem() { FieldName = "Name", Type = FilterType.Text.ToString(), Value = name });
             if (!string.IsNullOrWhiteSpace(phoneNumber))
@@ -39,6 +39,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
             return RedirectToAction(actionRedirect, new { filterItems = listFilterItems.FilterItemToJson(), page = page });
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(BaseSearchArgs args)
         {
             var users = await _userService.Gets(args);
@@ -53,19 +54,8 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
             return View(users);
         }
 
-        [Route("detail")]
-        public async Task<IActionResult> Detail(Guid id)
-        {
-            if (id == Guid.Empty) return RedirectToAction("Index", "Home");
-
-            var userDetail = await _userService.Get(id.ToString());
-
-            if (userDetail == null) return RedirectToAction("Index", "Home");
-
-            return View(userDetail);
-        }
-
         [Route("employees")]
+        [HttpGet]
         public async Task<IActionResult> Employees(BaseSearchArgs args)
         {
             var users = await _userService.Gets(args);
@@ -77,6 +67,19 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
             //ViewBag.DetailParam = "Employees";
 
             return View(users);
+        }
+
+        [Route("detail")]
+        [HttpGet]
+        public async Task<IActionResult> Detail(Guid id)
+        {
+            if (id == Guid.Empty) return RedirectToAction("Index", "Home");
+
+            var userDetail = await _userService.Get(id.ToString());
+
+            if (userDetail == null) return RedirectToAction("Index", "Home");
+
+            return View(userDetail);
         }
 
         [HttpGet("employeeDetail")]
@@ -116,7 +119,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
                 return View(employee);
             }
 
-            var result = await _userService.Create(employee);
+            var result = await _userService.CreateEmployee(employee);
 
             if (result.Equals(Guid.Empty.ToString()))
             {

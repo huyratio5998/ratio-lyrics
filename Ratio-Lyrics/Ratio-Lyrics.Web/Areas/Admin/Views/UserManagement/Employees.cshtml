@@ -3,14 +3,18 @@
 @model ListUsersViewModel<UserViewModel>
 
 @{
-    ViewData["Title"] = "User Management";
+    ViewData["Title"] = "Employee Management";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var language = "vi-VN";
     string detailParam = ViewBag.DetailParam != null ? ViewBag.DetailParam : "Index";
 }
 
-<h1>User Management</h1>
+<h1>Employee Management</h1>
 
-<p>   
+<p>
+    <span>
+        <a asp-action="CreateEmployee">Create employee</a>
+    </span>
     <span>
         <form asp-action="FilterOrder">
             <div class="form-control">
@@ -33,15 +37,18 @@
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
-            <tr>                                
+            <tr>
+                <th>
+                    Email
+                </th>
+                <th>
+                    Role
+                </th>
                 <th>
                     Display Name
                 </th>
                 <th>
                     Phone Number
-                </th>
-                <th>
-                    Email
                 </th>
                 <th></th>
             </tr>
@@ -65,7 +72,7 @@
                         </td>
                         <td>
                             @Html.DisplayFor(modeluser => user.PhoneNumber)
-                        </td>                        
+                        </td>
                         <td>
                             <a asp-action="UpdateEmployee" asp-route-userId="@user.Id">Edit</a> |
                             <a asp-action="EmployeeDetail" asp-route-id="@user.Id">Details</a> |

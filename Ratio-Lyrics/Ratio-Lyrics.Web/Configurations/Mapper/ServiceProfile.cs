@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
+using Newtonsoft.Json;
 using Ratio_Lyrics.Web.Areas.Admin.Models;
+using Ratio_Lyrics.Web.Areas.Admin.Models.User;
 using Ratio_Lyrics.Web.Entities;
 using Ratio_Lyrics.Web.Models;
+using System.Text.Json;
 
 namespace Ratio_Lyrics.Web.Configurations.Mapper
 {
@@ -51,11 +54,15 @@ namespace Ratio_Lyrics.Web.Configurations.Mapper
             CreateMap(typeof(PagedResponse<>), typeof(PagedResponse<>));
 
             //user
-            CreateMap<RatioLyricUsers, UserViewModel>();
+            CreateMap<RatioLyricUsers, UserViewModel>()
+                .ForMember(x => x.UserRoles, y => y.Ignore());
 
             //admin
             CreateMap<PagedResponse<SongViewModel>, ListSongsAdminViewModel>();
-
+            CreateMap<BaseSearchArgs,BaseSearchRequest>()
+                .ForMember(dest => dest.FilterItems, 
+                opt => opt.MapFrom(
+                    x => JsonConvert.DeserializeObject<IEnumerable<FacetFilterItem>>(x.FilterItems)));
         }
 
     }

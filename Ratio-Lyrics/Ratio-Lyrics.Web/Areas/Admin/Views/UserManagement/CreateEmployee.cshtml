@@ -1,10 +1,10 @@
-﻿@using RatioShop.Areas.Admin.Models.User
+﻿@using Ratio_Lyrics.Web.Areas.Admin.Models.User
 
-@model EmployeeViewModel
+@model UserViewModel
 
 @{
     ViewData["Title"] = "Create";
-    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 
     string errorMessage = ViewBag.ErrorMessage;
 }
@@ -31,29 +31,29 @@
                 }
             </div>
             <div class="form-group">
-                <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" required class="form-control" />
-                <span asp-validation-for="Username" class="text-danger"></span>
+                <label asp-for="UserName" class="control-label"></label>
+                <input asp-for="UserName" required class="form-control" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="control-label"></label>
                 <input asp-for="Password" type="password" required class="form-control" />
                 <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EmployeeCode" class="control-label"></label>
-                <input asp-for="EmployeeCode" required class="form-control" />
-                <span asp-validation-for="EmployeeCode" class="text-danger"></span>
-            </div>
+            </div>          
             <div class="form-group">
                 <label asp-for="PhoneNumber" class="control-label"></label>
                 <input asp-for="PhoneNumber" required class="form-control" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="EmployeeName" class="control-label"></label>
-                <input asp-for="EmployeeName" class="form-control" />
-                <span asp-validation-for="EmployeeName" class="text-danger"></span>
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DisplayName" class="control-label"></label>
+                <input asp-for="DisplayName" class="form-control" />
+                <span asp-validation-for="DisplayName" class="text-danger"></span>
             </div>
 
             <div class="form-group">

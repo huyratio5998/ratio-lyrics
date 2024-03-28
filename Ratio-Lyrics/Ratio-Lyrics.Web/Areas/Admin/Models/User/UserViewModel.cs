@@ -19,6 +19,6 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Models.User
 
         public List<string> UserRoles { get; set; } = new List<string>();
         public List<string>? AvailableRoles { get; set; }
-
+        public bool IsClientUser { get; set; }
     }
 }

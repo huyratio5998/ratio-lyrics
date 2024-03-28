@@ -17,8 +17,8 @@ namespace Ratio_Lyrics.Web.Repositories.Implements
         }
         public IEnumerable<RatioLyricUsers> GetAll(bool isTracking = false)
         {
-            return isTracking ? _dbSet : _dbSet.AsNoTracking();
-        }        
+            return isTracking ? _dbSet : _dbSet.AsNoTracking();            
+        }     
 
         public async Task<RatioLyricUsers> CreateAsync(RatioLyricUsers entity)
         {            

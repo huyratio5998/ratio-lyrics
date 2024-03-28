@@ -41,6 +41,20 @@ namespace Ratio_Lyrics.Web.Helpers
                 return DeviceType.Desktop;
             }
         }
+
+        public static IEnumerable<FacetFilterItem>? CleanDefaultFilter(this IEnumerable<FacetFilterItem>? filters)
+        {
+            if (filters == null || !filters.Any()) return null;
+
+            var result = new List<FacetFilterItem>();
+            foreach (var filter in filters)
+            {
+                if (filter == null || filter.Value.Equals("Default", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(filter.Value)) continue;
+                result.Add(filter);
+            }
+
+            return result;
+        }
     }
     public class Browser
     {

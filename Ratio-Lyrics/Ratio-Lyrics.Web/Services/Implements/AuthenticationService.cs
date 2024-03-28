@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Ratio_Lyrics.Web.Entities;
 using Ratio_Lyrics.Web.Models;
+using Ratio_Lyrics.Web.Models.Enums;
 using Ratio_Lyrics.Web.Services.Abstraction;
 using System.Security.Claims;
 
@@ -12,22 +12,14 @@ namespace Ratio_Lyrics.Web.Services.Implements
     {
         private readonly SignInManager<RatioLyricUsers> _signInManager;
         private readonly UserManager<RatioLyricUsers> _userManager;
-        private readonly IUserStore<RatioLyricUsers> _userStore;
-        private readonly IUserEmailStore<RatioLyricUsers> _emailStore;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ILogger _logger;                        
+        private readonly ILogger _logger;
         private readonly IUserService _userService;
 
         public AuthenticationService(SignInManager<RatioLyricUsers> signInManager
-            , UserManager<RatioLyricUsers> userManager, IUserStore<RatioLyricUsers> userStore
-            , IUserEmailStore<RatioLyricUsers> emailStore, RoleManager<IdentityRole> roleManager
-            , ILogger logger, IUserService userService)
+            , UserManager<RatioLyricUsers> userManager, ILogger logger, IUserService userService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
-            _userStore = userStore;
-            _emailStore = GetEmailStore();
-            _roleManager = roleManager;
             _logger = logger;
             _userService = userService;
         }
@@ -62,24 +54,16 @@ namespace Ratio_Lyrics.Web.Services.Implements
             {
                 var user = new RatioLyricUsers()
                 {
-                    DisplayName = info.Principal.FindFirstValue(ClaimTypes.Name)
+                    DisplayName = info.Principal.FindFirstValue(ClaimTypes.Name),
+                    IsClientUser = true,
                 };
-                string email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 string phoneNumber = info.Principal.FindFirstValue(ClaimTypes.MobilePhone);
 
-                // check username exist
-                if (await _userRepository.GetAll().AsQueryable().FirstOrDefaultAsync(x => x.UserName.Equals(email)) != null)
-                {
-                    email = $"{email}.{info.LoginProvider}".ToLower();
-                }
-
-                await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
-
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userService.CreateExternalUser(user, info);
                 if (result.Succeeded)
                 {
                     await _userService.UpdatePhoneNumber(user, phoneNumber);
+                    await _userManager.AddToRoleAsync(user, UserRole.Client.ToString());
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
@@ -104,17 +88,6 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 _logger.LogError($"Exception logout error: {ex}");
                 return false;
             }
-        }
-
-        
-
-        private IUserEmailStore<RatioLyricUsers> GetEmailStore()
-        {
-            if (!_userManager.SupportsUserEmail)
-            {
-                throw new NotSupportedException("The default UI requires a user store with email support.");
-            }
-            return (IUserEmailStore<RatioLyricUsers>)_userStore;
         }
     }
 }

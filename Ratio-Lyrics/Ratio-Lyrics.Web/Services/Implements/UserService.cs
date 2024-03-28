@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ratio_Lyrics.Web.Areas.Admin.Models;
 using Ratio_Lyrics.Web.Areas.Admin.Models.User;
 using Ratio_Lyrics.Web.Entities;
+using Ratio_Lyrics.Web.Helpers;
 using Ratio_Lyrics.Web.Helpers.QueryableHelpers;
 using Ratio_Lyrics.Web.Models;
 using Ratio_Lyrics.Web.Models.Enums;
@@ -20,7 +20,8 @@ namespace Ratio_Lyrics.Web.Services.Implements
         private readonly SignInManager<RatioLyricUsers> _signInManager;
         private readonly UserManager<RatioLyricUsers> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IUserStore<RatioLyricUsers> _userStore;        
+        private readonly IUserStore<RatioLyricUsers> _userStore;
+        private readonly IUserEmailStore<RatioLyricUsers> _emailStore;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -45,6 +46,39 @@ namespace Ratio_Lyrics.Web.Services.Implements
             _commonService = commonService;
             _userRepository = unitOfWork.UserRepository;
             _signInManager = signInManager;
+            _emailStore = GetEmailStore();
+        }
+
+        public async Task<ListUsersViewModel<UserViewModel>> Gets(BaseSearchArgs args)
+        {
+            int totalCount = 0;
+            var request = _mapper.Map<BaseSearchRequest>(args);
+            var users = GetRatioLyricUsers(request, out totalCount);
+            args.PageIndex = args.PageIndex <= 0 ? 1 : args.PageIndex;
+            users = users.Skip((args.PageIndex - 1) * args.PageSize).Take(args.PageSize);
+
+            var results = new List<UserViewModel>();
+            foreach (var item in users)
+            {
+                var user = _mapper.Map<UserViewModel>(item);
+                user.UserRoles = (await _userManager.GetRolesAsync(item)).ToList();
+                results.Add(user);
+            }
+
+            totalCount = results.Count;
+
+            var result = new ListUsersViewModel<UserViewModel>
+            {
+                Users = results,
+                PageIndex = args.PageIndex <= 0 ? 1 : args.PageIndex,
+                PageSize = args.PageSize,
+                FilterItems = request.FilterItems.CleanDefaultFilter(),
+                SortType = args.SortType,
+                IsSelectPreviousItems = args.IsSelectPreviousItems,
+                TotalCount = totalCount,
+                TotalPage = totalCount == 0 ? 1 : (int)Math.Ceiling((double)totalCount / args.PageSize)
+            };
+            return result;
         }
 
         public async Task<UserViewModel?> Get(string id)
@@ -52,7 +86,111 @@ namespace Ratio_Lyrics.Web.Services.Implements
             var user = await _userRepository.Get(id);
             if (user == null) return null;
 
-            return _mapper.Map<UserViewModel>(user);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var results = _mapper.Map<UserViewModel>(user);
+            results.UserRoles = roles.ToList();
+
+            return results;
+        }
+
+        public async Task<RegisterResponseViewModel> CreateEmployee(UserViewModel newUser)
+        {
+            if (newUser == null || string.IsNullOrWhiteSpace(newUser.UserName) || string.IsNullOrEmpty(newUser.Password)) return new RegisterResponseViewModel { Status = "Failure" };
+
+            var user = new RatioLyricUsers
+            {
+                DisplayName = newUser.DisplayName,
+                IsClientUser = false,
+                PasswordHash = _commonService.HashPasword(newUser.Password, out var salt),
+                HashSalt = Convert.ToHexString(salt),
+            };
+
+            await _userStore.SetUserNameAsync(user, newUser.UserName, CancellationToken.None);
+            var result = await _userManager.CreateAsync(user);
+
+            if (result.Succeeded)
+            {
+                await UpdatePhoneNumber(user, newUser.PhoneNumber);
+                await _userManager.AddToRolesAsync(user, newUser.UserRoles);
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return new RegisterResponseViewModel
+                {
+                    UserName = user.UserName,
+                    Status = "Success"
+                };
+            }
+
+            return new RegisterResponseViewModel { Status = "Failure" };
+        }
+
+        public async Task<IdentityResult> CreateExternalUser(RatioLyricUsers user, ExternalLoginInfo? info)
+        {
+            string email = info.Principal.FindFirstValue(ClaimTypes.Email);
+
+            // check username exist
+            if (await _userRepository.GetAll().AsQueryable().FirstOrDefaultAsync(x => x.UserName.Equals(email)) != null)
+            {
+                email = $"{email}.{info.LoginProvider}".ToLower();
+            }
+
+            await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
+            await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
+
+            var result = await _userManager.CreateAsync(user);
+            return result;
+        }
+
+        public async Task<bool> UpdateEmployee(UserViewModel userModel)
+        {
+            try
+            {
+                var user = await _userRepository.Get(userModel.Id.ToString());
+
+                if (user == null) return false;
+
+                // update basic info
+                user.PhoneNumber = userModel.PhoneNumber;
+                user.DisplayName = userModel.DisplayName;
+                user.Email = userModel.Email;
+                await _unitOfWork.SaveAsync();
+
+                // update role
+                var currentUserRoles = await _userManager.GetRolesAsync(user);
+                var isEqual = currentUserRoles?.OrderBy(x => x).ToList().SequenceEqual(userModel.UserRoles.OrderBy(x => x));
+                bool updateRoleStatus = true;
+                if (isEqual != true)
+                {
+                    await _userManager.RemoveFromRolesAsync(user, currentUserRoles);
+
+                    var result = await _userManager.AddToRolesAsync(user, userModel.UserRoles);
+                    updateRoleStatus = result.Succeeded;
+                }
+
+                // update phone number
+                //bool setPhoneStatus = true;
+                //if (userModel.PhoneNumber != user.PhoneNumber)
+                //{
+                //    var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, userModel.PhoneNumber);
+                //    setPhoneStatus = setPhoneResult.Succeeded;
+                //}
+
+                if (updateRoleStatus)
+                {
+                    await _unitOfWork.CommitAsync();
+                    return true;
+                }
+
+                _logger.LogError("Failure to update user roles");
+                await _unitOfWork.RollbackAsync();
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception save admin user: {ex}");
+                await _unitOfWork.RollbackAsync();
+                return false;
+            }
         }
 
         public async Task<bool> UpdatePhoneNumber(RatioLyricUsers user, string newPhoneNumber)
@@ -69,33 +207,27 @@ namespace Ratio_Lyrics.Web.Services.Implements
             return true;
         }
 
-        public async Task<RegisterResponseViewModel> RegisterAdminUser(UserViewModel newUser)
+        public async Task<bool> Delete(string id)
         {
-            if (newUser == null || string.IsNullOrWhiteSpace(newUser.UserName) || string.IsNullOrEmpty(newUser.Password)) return new RegisterResponseViewModel { Status = "Failure" };
+            var result = await _userRepository.DeleteAsync(id);
+            if (!result) return false;
 
-            var user = new RatioLyricUsers
-            {
-                DisplayName = newUser.DisplayName,
-                PasswordHash = _commonService.HashPasword(newUser.Password, out var salt),
-                HashSalt = Convert.ToHexString(salt)
-            };
+            await _unitOfWork.SaveAsync();
+            return result;
+        }
 
-            await _userStore.SetUserNameAsync(user, newUser.UserName, CancellationToken.None);
-            var result = await _userManager.CreateAsync(user);
+        public async Task<List<string>>? GetUserRoles(RatioLyricUsers user)
+        {
+            if (user == null) return null;
 
-            if (result.Succeeded)
-            {
-                await UpdatePhoneNumber(user, newUser.PhoneNumber);
-                await _userManager.AddToRoleAsync(user, Constants.CommonConstant.Admin);
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return new RegisterResponseViewModel
-                {
-                    UserName = user.UserName,
-                    Status = "Success"
-                };
-            }
+            var result = await _userManager.GetRolesAsync(user);
+            return result.ToList();
+        }
 
-            return new RegisterResponseViewModel { Status = "Failure" };
+        public async Task<List<IdentityRole>> GetRoles()
+        {
+            var roles = await _roleManager.Roles.ToListAsync();
+            return roles;
         }
 
         public async Task<LoginResponseViewModel> AdminUserLogin(LoginRequestViewModel request)
@@ -114,98 +246,6 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 UserName = request.UserName,
                 Status = "Success"
             };
-        }       
-
-        public async Task<List<IdentityRole>> GetRoles()
-        {
-            var roles = await _roleManager.Roles.ToListAsync();
-            return roles;
-        }
-
-        public async Task<ListUsersViewModel<UserViewModel>> Gets(BaseSearchArgs args)
-        {
-            int totalCount = 0;
-            var request = _mapper.Map<BaseSearchRequest>(args);
-            var users = GetRatioLyricUsers(request, out totalCount);
-
-            var usersInfo = _mapper.Map<List<UserViewModel>>(users);
-
-            if (usersInfo != null && usersInfo.Any())
-            {
-                foreach (var item in usersInfo)
-                {
-                    var user = await Get(item.Id.ToString());
-                    if (user == null) continue;
-
-                    var roles = await GetUserRoles(user);
-                    item.UserRole = String.Join(", ", roles);
-                }
-            }
-
-            totalCount = usersInfo.Count;
-            args.PageIndex = args.PageIndex <= 0 ? 1 : args.PageIndex;
-            usersInfo = usersInfo.OrderBy(x => x.UserRole).ThenBy(x => x.FullName).Skip((args.PageIndex - 1) * args.PageSize).Take(args.PageSize).ToList();
-
-            var result = new ListUsersViewModel<UserViewModel>
-            {
-                Users = usersInfo,
-                PageIndex = args.PageIndex <= 0 ? 1 : args.PageIndex,
-                PageSize = args.PageSize,
-                FilterItems = args.FilterItems.CleanDefaultFilter(),
-                SortType = args.SortType,
-                IsSelectPreviousItems = args.IsSelectPreviousItems,
-                TotalCount = totalCount,
-                TotalPage = totalCount == 0 ? 1 : (int)Math.Ceiling((double)totalCount / args.PageSize)
-            };
-            return result;
-        }
-
-        public Task<string> Create(UserViewModel user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> Update(UserViewModel user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> Delete(string id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> CreateExternalUser(RatioLyricUsers user, ExternalLoginInfo? info)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> CheckUserNameExist(string userName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<string>>? GetUserRoles(RatioLyricUsers user)
-        {
-            if (user == null) return null;
-
-            var result = await _userManager.GetRolesAsync(user);
-            return result.ToList();
-        }
-
-        public Task<ListUsersViewModel<UserViewModel>> GetListEmployees(BaseSearchRequest args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> CreateEmployee(UserViewModel user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateEmployee(UserViewModel user)
-        {
-            throw new NotImplementedException();
         }
 
         private IQueryable<RatioLyricUsers>? GetRatioLyricUsers(BaseSearchRequest args, out int totalCount)
@@ -218,6 +258,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
 
             return users;
         }
+
         private IQueryable<RatioLyricUsers>? BuildShopUserFilters(IQueryable<RatioLyricUsers>? queries, IFacetFilter? filters)
         {
             if (queries == null || filters == null || filters.FilterItems == null || !filters.FilterItems.Any()) return queries;
@@ -237,7 +278,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
                             switch (item.FieldName)
                             {
                                 case "":
-                                    break;                                
+                                    break;
                                 case "Name":
                                     predicate = predicate.And(x => x.DisplayName.Contains(item.Value));
                                     break;
@@ -246,14 +287,31 @@ namespace Ratio_Lyrics.Web.Services.Implements
                                     break;
                                 case "Email":
                                     predicate = predicate.And(x => x.Email.Contains(item.Value));
-                                    break;                                
+                                    break;
                             }
                             break;
                         }
+                    case FilterType.Bool:
+                        switch (item.FieldName)
+                        {
+                            case "IsClientUser":
+                                predicate = predicate.And(x => x.IsClientUser == bool.Parse(item.Value));
+                                break;
+                        }
+                        break;
                 }
             }
 
             return queries.Where(predicate);
+        }
+
+        private IUserEmailStore<RatioLyricUsers> GetEmailStore()
+        {
+            if (!_userManager.SupportsUserEmail)
+            {
+                throw new NotSupportedException("The default UI requires a user store with email support.");
+            }
+            return (IUserEmailStore<RatioLyricUsers>)_userStore;
         }
     }
 }

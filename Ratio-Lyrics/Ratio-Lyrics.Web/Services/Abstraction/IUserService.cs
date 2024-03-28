@@ -10,20 +10,16 @@ namespace Ratio_Lyrics.Web.Services.Abstraction
     {
         Task<ListUsersViewModel<UserViewModel>> Gets(BaseSearchArgs args);
         Task<UserViewModel?> Get(string id);
-        Task<string> Create(UserViewModel user);
-        Task<bool> Update(UserViewModel user);
+        Task<RegisterResponseViewModel> CreateEmployee(UserViewModel newUser);
+        Task<IdentityResult> CreateExternalUser(RatioLyricUsers user, ExternalLoginInfo? info);
+        Task<bool> UpdateEmployee(UserViewModel userModel);
+        Task<bool> UpdatePhoneNumber(RatioLyricUsers user, string newPhoneNumber);
         Task<bool> Delete(string id);
 
-        //
-        Task<int> CreateExternalUser(RatioLyricUsers user, ExternalLoginInfo? info);
-        Task<bool> CheckUserNameExist(string userName);
-        Task<bool> UpdatePhoneNumber(RatioLyricUsers user, string newPhoneNumber);        
+        Task<List<string>>? GetUserRoles(RatioLyricUsers user);
         Task<List<IdentityRole>> GetRoles();
-        Task<List<string>>? GetUserRoles(RatioLyricUsers user);                                
-        Task<ListUsersViewModel<UserViewModel>> GetListEmployees(BaseSearchRequest args);                
-        Task<bool> CreateEmployee(UserViewModel user);
-        Task<bool> UpdateEmployee(UserViewModel user);
-        Task<RegisterResponseViewModel> RegisterAdminUser(UserViewModel newUser);
-        Task<LoginResponseViewModel> AdminUserLogin(LoginRequestViewModel request);        
+        Task<LoginResponseViewModel> AdminUserLogin(LoginRequestViewModel request);
+
+
     }
 }

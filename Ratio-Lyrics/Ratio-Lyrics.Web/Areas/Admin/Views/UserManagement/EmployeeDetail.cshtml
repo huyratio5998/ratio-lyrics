@@ -1,10 +1,10 @@
-﻿@using RatioShop.Areas.Admin.Models.User
+﻿@using Ratio_Lyrics.Web.Areas.Admin.Models.User
 
-@model EmployeeViewModel
+@model UserViewModel
 
 @{
     ViewData["Title"] = "Details";
-    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <h1>Details</h1>
@@ -14,22 +14,10 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Username)
+            @Html.DisplayNameFor(model => model.DisplayName)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Username)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.EmployeeCode)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.EmployeeCode)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.EmployeeName)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.EmployeeName)
+            @Html.DisplayFor(model => model.DisplayName)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PhoneNumber)
@@ -44,16 +32,10 @@
             @Html.DisplayFor(model => model.Email)
         </dd>
         <dt class="col-sm-2">
-            Address
+            @Html.DisplayNameFor(model => model.UserRoles)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.FullShippingAddress)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.UserRole)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.UserRole)
+            @string.Join(", ", Model.UserRoles)
         </dd>
     </dl>
 </div>
