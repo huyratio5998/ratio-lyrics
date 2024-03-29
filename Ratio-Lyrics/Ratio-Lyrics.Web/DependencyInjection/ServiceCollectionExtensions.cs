@@ -40,6 +40,7 @@ namespace Ratio_Lyrics.Web.DependencyInjection
             services.AddScoped<IMediaPlatformService, MediaPlatformService>();
             services.AddScoped<ISongService, SongService>();            
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<ISiteSettingService, SiteSettingService>();
             services.AddScoped<ICacheService, CacheService>();
 

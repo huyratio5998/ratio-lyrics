@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Ratio_Lyrics.Web.Areas.Admin.Models;
 using Ratio_Lyrics.Web.Areas.Admin.Models.User;
 using Ratio_Lyrics.Web.Entities;
@@ -63,9 +64,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 var user = _mapper.Map<UserViewModel>(item);
                 user.UserRoles = (await _userManager.GetRolesAsync(item)).ToList();
                 results.Add(user);
-            }
-
-            totalCount = results.Count;
+            }            
 
             var result = new ListUsersViewModel<UserViewModel>
             {
@@ -96,7 +95,10 @@ namespace Ratio_Lyrics.Web.Services.Implements
 
         public async Task<RegisterResponseViewModel> CreateEmployee(UserViewModel newUser)
         {
-            if (newUser == null || string.IsNullOrWhiteSpace(newUser.UserName) || string.IsNullOrEmpty(newUser.Password)) return new RegisterResponseViewModel { Status = "Failure" };
+            if (newUser == null 
+                || string.IsNullOrWhiteSpace(newUser.UserName) 
+                || string.IsNullOrEmpty(newUser.Password)) 
+                return new RegisterResponseViewModel { Status = Constants.CommonConstant.Failure, Message = "Bad request" };
 
             var user = new RatioLyricUsers
             {
@@ -106,7 +108,15 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 HashSalt = Convert.ToHexString(salt),
             };
 
+            var existUser = await _userStore.FindByNameAsync(newUser.UserName.ToString().ToUpper(), CancellationToken.None);
+            if(existUser != null)
+            {
+                _logger.LogError($"Can't create new user. Username existed: {newUser.UserName}");
+                return new RegisterResponseViewModel { Status = Constants.CommonConstant.Failure, Message = "Username existed!" };
+            }
+
             await _userStore.SetUserNameAsync(user, newUser.UserName, CancellationToken.None);
+            await _emailStore.SetEmailAsync(user, newUser.Email, CancellationToken.None);
             var result = await _userManager.CreateAsync(user);
 
             if (result.Succeeded)
@@ -117,11 +127,11 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 return new RegisterResponseViewModel
                 {
                     UserName = user.UserName,
-                    Status = "Success"
+                    Status = Constants.CommonConstant.Success
                 };
             }
 
-            return new RegisterResponseViewModel { Status = "Failure" };
+            return new RegisterResponseViewModel { Status = Constants.CommonConstant.Failure, Message="Can't create user" };
         }
 
         public async Task<IdentityResult> CreateExternalUser(RatioLyricUsers user, ExternalLoginInfo? info)
@@ -145,6 +155,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
         {
             try
             {
+                await _unitOfWork.CreateTransactionAsync();
                 var user = await _userRepository.Get(userModel.Id.ToString());
 
                 if (user == null) return false;
@@ -232,19 +243,19 @@ namespace Ratio_Lyrics.Web.Services.Implements
 
         public async Task<LoginResponseViewModel> AdminUserLogin(LoginRequestViewModel request)
         {
-            if (request == null || string.IsNullOrEmpty(request.UserName) || string.IsNullOrEmpty(request.Password)) return new LoginResponseViewModel { Status = "Failure" };
+            if (request == null || string.IsNullOrEmpty(request.UserName) || string.IsNullOrEmpty(request.Password)) return new LoginResponseViewModel { Status = Constants.CommonConstant.Failure };
 
             var userInfo = await _userRepository.GetAll().AsQueryable().FirstOrDefaultAsync(x => x.UserName.Equals(request.UserName));
-            if (userInfo == null || string.IsNullOrEmpty(userInfo.PasswordHash) || string.IsNullOrEmpty(userInfo.HashSalt)) return new LoginResponseViewModel { Status = "Failure" };
+            if (userInfo == null || string.IsNullOrEmpty(userInfo.PasswordHash) || string.IsNullOrEmpty(userInfo.HashSalt)) return new LoginResponseViewModel { Status = Constants.CommonConstant.Failure };
 
             var result = _commonService.VerifyPassword(request.Password, userInfo.PasswordHash, Convert.FromHexString(userInfo.HashSalt));
-            if (!result) return new LoginResponseViewModel { Status = "Failure" };
+            if (!result) return new LoginResponseViewModel { Status = Constants.CommonConstant.Failure };
 
             await _signInManager.SignInAsync(userInfo, isPersistent: false);
             return new LoginResponseViewModel
             {
                 UserName = request.UserName,
-                Status = "Success"
+                Status = Constants.CommonConstant.Success
             };
         }
 

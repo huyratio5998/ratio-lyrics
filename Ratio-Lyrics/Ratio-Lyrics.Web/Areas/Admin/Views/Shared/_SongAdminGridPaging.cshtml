@@ -1,0 +1,94 @@
+﻿@using Ratio_Lyrics.Web.Areas.Admin.Models
+@using Ratio_Lyrics.Web.Helpers
+@model BaseAdminPagingViewModel
+
+@if (Model == null || Model.TotalPages <= 1) return;
+
+@{
+    // params pass
+    var parms = new Dictionary<string, string>();
+    var area = ViewBag.Area;
+    var controller = ViewBag.Controller;
+    var action = ViewBag.Action;
+    if (!string.IsNullOrWhiteSpace(Model.SearchText)) parms.Add("searchText", Model.SearchText);
+    if (Model.OrderBy != OrderType.Asc) parms.Add("orderBy", Model.OrderBy.ToString());
+
+
+    // setting UI
+    var disablePrevious = Model.PageIndex == 1 ? "disabled" : "";
+    var disableNext = Model.PageIndex == Model.TotalPages ? "disabled" : "";
+
+    int maxContinuesPage = 10;
+    int stepEachGap = 2;
+    int rangeLimit = 5;
+    bool generateDotBefore = false;
+    bool generateDotAfter = false;
+}
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination">
+        <li class="page-item @disablePrevious">
+            @{
+                if (Model.PageIndex - 1 <= 1) parms.Remove("page");
+                else parms["page"] = (Model.PageIndex - 1).ToString();
+            }
+            <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        @for (var i = 1; i <= Model.TotalPages; i++)
+        {
+            if (i == 1) parms.Remove("page");
+            else parms["page"] = i.ToString();
+
+            if (Model.TotalPages > maxContinuesPage)
+            {
+                if (i > 1 && i < Model.TotalPages)
+                {
+                    if (!generateDotBefore && i < Model.PageIndex - 2)
+                    {
+                        generateDotBefore = true;
+                        <li class="page-item">
+                            <a class="page-link">...</a>
+                        </li>
+                    }
+                    else if ((Model.PageIndex - stepEachGap <= i && i <= Model.PageIndex + stepEachGap) || (Model.PageIndex + 2 < rangeLimit && i <= rangeLimit) || (Model.PageIndex - 2 > Model.TotalPages - rangeLimit && i > Model.TotalPages - rangeLimit))
+                    {
+                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                            <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link">@i</a>
+                        </li>
+                    }
+                    else if (!generateDotAfter && Model.PageIndex + 2 < i && i < Model.TotalPages - 1)
+                    {
+                        generateDotAfter = true;
+                        <li class="page-item">
+                            <a class="page-link">...</a>
+                        </li>
+                    }
+                }
+                else
+                {
+                    generateDotBefore = false;
+                    generateDotAfter = false;
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link">@i</a>
+                    </li>
+                }
+            }
+            else
+            {
+                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                    <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link">@i</a>
+                </li>
+            }
+        }
+        <li class="page-item @disableNext">
+            @{
+                parms["page"] = (Model.PageIndex + 1).ToString();
+            }
+            <a asp-area="@area" asp-action="@(string.IsNullOrEmpty(action) ? "Index" : action)" asp-controller="@controller" asp-all-route-data="parms" class="page-link" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>

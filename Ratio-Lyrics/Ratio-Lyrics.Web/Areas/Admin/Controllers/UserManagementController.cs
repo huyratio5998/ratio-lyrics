@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Ratio_Lyrics.Web.Areas.Admin.Models;
 using Ratio_Lyrics.Web.Areas.Admin.Models.User;
 using Ratio_Lyrics.Web.Helpers;
@@ -9,7 +10,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Route("admin/userManagements")]
-    //[Authorize(Roles = "Admin,Manager,SuperAdmin")]
+    [Authorize(Roles = "Admin,Manager,SuperAdmin")]
     public class UserManagementController : Controller
     {
         private readonly IUserService _userService;
@@ -23,10 +24,10 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult FilterOrder(string actionRedirect, string? name, string? phoneNumber, string? email, int? page = 1)
+        public IActionResult FilterOrder(string actionRedirect, string? name, string? phoneNumber, string? email, bool isClientUser, int? page = 1)
         {
             var listFilterItems = new List<FacetFilterItem>();
-            listFilterItems.Add(new FacetFilterItem() { FieldName = "IsClientUser", Type = FilterType.Bool.ToString(), Value = "true" });
+            listFilterItems.Add(new FacetFilterItem() { FieldName = "IsClientUser", Type = FilterType.Bool.ToString(), Value = isClientUser.ToString() });
             if (!string.IsNullOrWhiteSpace(name))
                 listFilterItems.Add(new FacetFilterItem() { FieldName = "Name", Type = FilterType.Text.ToString(), Value = name });
             if (!string.IsNullOrWhiteSpace(phoneNumber))
@@ -42,6 +43,11 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(BaseSearchArgs args)
         {
+            args.IsSelectPreviousItems = false;
+            if (string.IsNullOrWhiteSpace(args.FilterItems))
+                args.FilterItems = "[{\"fieldName\":\"IsClientUser\",\"value\":\"True\",\"type\":\"Bool\"}]";           
+            args.PageSize = CommonHelper.GetClientDevice(Request) == DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
+
             var users = await _userService.Gets(args);
 
             if (users == null) return RedirectToAction("Index", "Home");
@@ -49,7 +55,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
             ViewBag.Area = "Admin";
             ViewBag.Controller = "UserManagements";
             ViewBag.Action = "Index";
-            //ViewBag.DetailParam = "Index";
+            ViewBag.DetailParam = "Index";
 
             return View(users);
         }
@@ -58,13 +64,18 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Employees(BaseSearchArgs args)
         {
+            args.IsSelectPreviousItems = false;
+            if (string.IsNullOrWhiteSpace(args.FilterItems))
+                args.FilterItems = "[{\"fieldName\":\"IsClientUser\",\"value\":\"False\",\"type\":\"Bool\"}]";
+            args.PageSize = CommonHelper.GetClientDevice(Request) == DeviceType.Desktop ? pageSizeClientDesktopDefault : pageSizeClientMobileDefault;
+
             var users = await _userService.Gets(args);
             if (users == null) return RedirectToAction("Index", "Home");
 
             ViewBag.Area = "Admin";
             ViewBag.Controller = "UserManagements";
             ViewBag.Action = "Employees";
-            //ViewBag.DetailParam = "Employees";
+            ViewBag.DetailParam = "Employees";
 
             return View(users);
         }
@@ -121,9 +132,9 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
 
             var result = await _userService.CreateEmployee(employee);
 
-            if (result.Equals(Guid.Empty.ToString()))
+            if (result == null || result.Status.Equals(Constants.CommonConstant.Failure))
             {
-                ViewBag.ErrorMessage = "Fail to create employee!";
+                ViewBag.ErrorMessage = string.IsNullOrEmpty(result.Message) ? "Fail to create employee!" : result.Message;
                 return View(employee);
             }
             return RedirectToAction("Employees");

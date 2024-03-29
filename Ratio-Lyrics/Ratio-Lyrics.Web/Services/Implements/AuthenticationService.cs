@@ -16,7 +16,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
         private readonly IUserService _userService;
 
         public AuthenticationService(SignInManager<RatioLyricUsers> signInManager
-            , UserManager<RatioLyricUsers> userManager, ILogger logger, IUserService userService)
+            , UserManager<RatioLyricUsers> userManager, ILogger<AuthenticationService> logger, IUserService userService)
         {
             _signInManager = signInManager;
             _userManager = userManager;

@@ -11,7 +11,9 @@
         public static DateTimeOffset AbsoluteExpirationDefault = DateTime.Now.AddMinutes(5);
 
         public const string Admin = "Admin";
-
         public const string GoogleProvider = "Google";
+
+        public const string Success = "Success";
+        public const string Failure= "Failure";
     }
 }

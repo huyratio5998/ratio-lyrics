@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Ratio_Lyrics.Web.Data;
 using Ratio_Lyrics.Web.DependencyInjection;
 using Ratio_Lyrics.Web.Entities;
+using Ratio_Lyrics.Web.Helpers;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -71,5 +72,5 @@ app.MapControllerRoute(
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 app.MapDefaultControllerRoute();
 app.MapRazorPages();
-
+await app.CreateRolesAsync(builder.Configuration);
 app.Run();

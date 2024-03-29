@@ -26,6 +26,8 @@
                         <input type="text" name="@item.FieldName" id="@item.FieldName" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals(item.FieldName))?.Value" />
                     }
                 }
+
+                <input type="hidden" name="isClientUser" value="false" />
                 <input type="hidden" name="actionRedirect" value="@detailParam" />
                 <input type="hidden" name="page" value="1" />
                 <input type="submit" value="Filter" />
@@ -40,12 +42,12 @@
             <tr>
                 <th>
                     Email
+                </th>               
+                <th>
+                    Display Name
                 </th>
                 <th>
                     Role
-                </th>
-                <th>
-                    Display Name
                 </th>
                 <th>
                     Phone Number
@@ -65,10 +67,10 @@
                             @Html.DisplayFor(modeluser => user.Email)
                         </td>
                         <td>
-                            @string.Join(", ", user.UserRoles)
+                            @Html.DisplayFor(modeluser => user.DisplayName)
                         </td>
                         <td>
-                            @Html.DisplayFor(modeluser => user.DisplayName)
+                            @string.Join(", ", user.UserRoles)
                         </td>
                         <td>
                             @Html.DisplayFor(modeluser => user.PhoneNumber)
