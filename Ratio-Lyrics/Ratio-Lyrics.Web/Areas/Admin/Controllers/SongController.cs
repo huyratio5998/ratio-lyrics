@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.HttpSys;
 using Ratio_Lyrics.Web.Areas.Admin.Models;
 using Ratio_Lyrics.Web.Models;
 using Ratio_Lyrics.Web.Services.Abstraction;
@@ -9,6 +9,7 @@ using System.Text.Json;
 namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin,Manager,SuperAdmin,ContentEditor")]
     public class SongController : Controller
     {
         private readonly IMapper _mapper;
@@ -41,7 +42,7 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
 
             ViewBag.Area = "Admin";
             ViewBag.Controller = "Song";
-            ViewBag.Action = "Index";
+            ViewBag.Action = "Index";            
 
             return View(songs);
         }

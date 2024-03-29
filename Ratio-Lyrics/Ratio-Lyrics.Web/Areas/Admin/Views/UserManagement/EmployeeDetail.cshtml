@@ -1,0 +1,51 @@
+﻿@using Ratio_Lyrics.Web.Areas.Admin.Models.User
+
+@model UserViewModel
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Employee</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.UserName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.UserName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DisplayName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DisplayName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PhoneNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PhoneNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.UserRoles)
+        </dt>
+        <dd class="col-sm-10">
+            @string.Join(", ", Model.UserRoles)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="UpdateEmployee" asp-route-userId="@Model?.Id">Edit</a> |
+    <a asp-action="Employees">Back to List</a>
+</div>

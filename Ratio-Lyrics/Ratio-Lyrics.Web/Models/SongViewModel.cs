@@ -27,9 +27,11 @@ namespace Ratio_Lyrics.Web.Models
         public string? AppleMusicLink { get; set; }
         public string? MediaLinksForm { get; set; }
         public string? ArtistForm { get; set; }
+        
         //Lyrics
         public string Lyric { get; set; }
         public decimal Views { get; set; }
+        public string? ContributedBy { get; set; }
         public List<SongMediaPlatformViewModel>? MediaPlatformLinks { get; set; }
         public List<ArtistViewModel>? Artists { get; set; }
     }

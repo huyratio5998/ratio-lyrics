@@ -1,6 +1,12 @@
 ﻿@using System.Text.Json
+@inject ILayoutSettingsViewModel layoutSetting
 @model HomeViewModel
 
+@{
+    Model.SongModel.Name = string.Empty;
+    Model.SongModel.Lyric = string.Empty;
+    Model.SongModel.ReleaseDate = DateTime.Now;
+}
 <div id="contribute-song-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -15,7 +21,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="SongModel.Name" class="control-label">Name*</label>
-                                <input asp-for="SongModel.Name" class="form-control" />
+                                <input asp-for="SongModel.Name" class="js_ratio-name form-control" />
                                 <span asp-validation-for="SongModel.Name" class="text-danger"></span>
                             </div>
                             <div class="form-group">
@@ -65,6 +71,7 @@
                             <textarea asp-for="SongModel.Lyric" class="form-control"></textarea>
                             <span asp-validation-for="SongModel.Lyric" class="text-danger"></span>
                         </div>
+                        <input type="hidden" asp-for="SongModel.ContributedBy" value="@Model.SongModel.ContributedBy" />
                         <input type="hidden" asp-for="SongModel.MediaLinksForm" value="@JsonSerializer.Serialize(Model.SongModel.MediaPlatformLinks)" />
                     </div>
 

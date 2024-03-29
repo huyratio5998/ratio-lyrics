@@ -70,7 +70,14 @@
         </div>
 
         <div>
-            <h3>Lyrics:</h3>
+            <p>
+                <span class="h3">Lyrics:</span>
+                <span>
+                    <i>
+                        @(string.IsNullOrEmpty(Model.SongModel.ContributedBy) ? "" : $"(contributed by {Model.SongModel.ContributedBy})")
+                    </i>
+                </span>
+            </p>
             <div>@Html.Raw(Model.SongModel.Lyric)</div>
         </div>
     </div>

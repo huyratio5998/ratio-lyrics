@@ -33,11 +33,14 @@ namespace Ratio_Lyrics.Web.DependencyInjection
         public static IServiceCollection AddApplicationServicesConfig(this IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<ICommonService, CommonService>();            
+            services.AddSingleton<ICommonService, CommonService>();
+            services.AddScoped<ILayoutSettingsViewModel, LayoutSettingsViewModel>();
 
             services.AddScoped<IArtistService, ArtistService>();
             services.AddScoped<IMediaPlatformService, MediaPlatformService>();
             services.AddScoped<ISongService, SongService>();            
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<ISiteSettingService, SiteSettingService>();
             services.AddScoped<ICacheService, CacheService>();
 
@@ -46,6 +49,7 @@ namespace Ratio_Lyrics.Web.DependencyInjection
 
         public static IServiceCollection AddApplicationRepositoriesConfig(this IServiceCollection services)
         {
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -103,6 +107,17 @@ namespace Ratio_Lyrics.Web.DependencyInjection
                 x.BaseAddress = new Uri("https://www.google.com/");
             });
 
+            return services;
+        }
+
+        public static IServiceCollection AddExternalAuthenticationConfig(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    options.ClientId = configuration["Authentication:Google:ClientId"];
+                    options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+                });            
             return services;
         }
     }

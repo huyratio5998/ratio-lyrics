@@ -1,0 +1,85 @@
+﻿@using Ratio_Lyrics.Web.Areas.Admin.Models.User
+
+@model ListUsersViewModel<UserViewModel>
+
+@{
+    ViewData["Title"] = "User Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string detailParam = ViewBag.DetailParam != null ? ViewBag.DetailParam : "Index";
+}
+
+<h1>User Management</h1>
+
+<p>   
+    <span>
+        <form asp-action="FilterOrder">
+            <div class="form-control">
+                @if (Model.AvailableFilters != null && Model.AvailableFilters.Any())
+                {
+                    foreach (var item in Model.AvailableFilters)
+                    {
+                        <label for="@item.FieldName">@item.FieldName:</label>
+                        <input type="text" name="@item.FieldName" id="@item.FieldName" value="@Model.FilterItems?.FirstOrDefault(x=>x.FieldName.Equals(item.FieldName))?.Value" />
+                    }
+                }
+
+                <input type="hidden" name="isClientUser" value="true" />
+                <input type="hidden" name="actionRedirect" value="@detailParam" />
+                <input type="hidden" name="page" value="1" />
+                <input type="submit" value="Filter" />
+            </div>
+        </form>
+    </span>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>                                
+                <th>
+                    Display Name
+                </th>
+                <th>
+                    Roles
+                </th>
+                <th>
+                    Phone Number
+                </th>
+                <th>
+                    Email
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model.Users != null && Model.Users.Any())
+            {
+
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.DisplayName)
+                        </td>
+                        <td>
+                            @string.Join(", ", user.UserRoles)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modeluser => user.PhoneNumber)
+                        </td>                        
+                        <td>
+                            @Html.DisplayFor(modeluser => user.Email)
+                        </td>
+                        <td>                            
+                            <a asp-action="Detail" asp-route-id="@user.Id">Details</a>                            
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<partial name="_AdminGridPaging" model="Model" />
+

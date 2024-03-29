@@ -129,8 +129,10 @@ const ResetSongSearchBar = () => {
 };
 //song detail
 const BuildArtistBlockHtml = (artistArray) => {
-  let artist = artistArray.map((el) => el.name).join(", ");
   let artistBlockHtml = ``;
+  if (!artistArray) return artistBlockHtml;
+
+  let artist = artistArray.map((el) => el.name).join(", ");
   if (artist != "")
     artistBlockHtml += `<p><span class="h4">Artist: </span><span><i>${artist}</i></span> </p>`;
 
@@ -139,6 +141,7 @@ const BuildArtistBlockHtml = (artistArray) => {
 
 const BuildSongDescriptionBlockHtml = (description) => {
   let result = ``;
+  if (!description) return result;
   const desctiptionLength = description.length;
   let descriptionDisplay = description.substring(
     0,
@@ -154,6 +157,8 @@ const BuildSongDescriptionBlockHtml = (description) => {
 
 const BuildMediaPlatformBlockHtml = (mediaPlatformLinks) => {
   let mediaPlatformItems = ``;
+  if (!mediaPlatformLinks) return mediaPlatformItems;
+
   mediaPlatformLinks
     .filter((x) => x.link != "")
     .forEach((el) => {
@@ -208,7 +213,18 @@ const BuildSongDetailHtml = (song) => {
     </div>
 </div>        
   <div>
-      <h3>Lyrics:</h3>
+      <p>
+          <span class="h3">Lyrics:</span>
+          <span>
+              <i>
+                  ${
+                    song.contributedBy
+                      ? `(contributed by ${song.contributedBy})`
+                      : ""
+                  }
+              </i>
+          </span>
+      </p>      
       <div>${song.lyric}</div>
   </div>`;
   return result;
@@ -279,7 +295,8 @@ const ContributeNewSongEvent = () => {
   if (!btnContributeSong) return;
 
   btnContributeSong.addEventListener("click", () => {
-    document.forms[0].reset();
+    document.querySelector("#js_contribute-song-form").reset();
+
     const imagePreview = document.querySelector(".js_img_changeTarget img");
     if (!imagePreview) return;
 

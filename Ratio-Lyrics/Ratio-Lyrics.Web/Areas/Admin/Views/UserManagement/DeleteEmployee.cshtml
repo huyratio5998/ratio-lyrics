@@ -1,0 +1,48 @@
+﻿@using Ratio_Lyrics.Web.Areas.Admin.Models.User
+
+@model UserViewModel
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1>Delete</h1>
+
+<div>
+    <h4>Employee</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DisplayName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DisplayName)
+        </dd>        
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PhoneNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PhoneNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Email)
+        </dd>        
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.UserRoles)
+        </dt>
+        <dd class="col-sm-10">
+            @string.Join(", ", Model.UserRoles)
+        </dd>
+    </dl>
+</div>
+<div>
+    <form asp-action="DeleteEmployeeConfirmed">
+        <input type="hidden" name="userId" value="@Model?.Id" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Employees">Back to List</a>
+    </form>
+</div>

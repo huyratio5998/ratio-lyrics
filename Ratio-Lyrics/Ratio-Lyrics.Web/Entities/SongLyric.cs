@@ -4,6 +4,7 @@
     {
         public string Lyric { get; set; }
         public decimal Views { get; set; }
+        public string? ContributedBy { get; set; }
         public int SongId { get; set; }
         public Song Songs { get; set; }
     }

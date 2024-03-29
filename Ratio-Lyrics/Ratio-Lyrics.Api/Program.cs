@@ -1,9 +1,11 @@
 using Asp.Versioning;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Ratio_Lyrics.Api.ServiceConfiguration;
 using Ratio_Lyrics.Api.SwaggerConfig;
+using Ratio_Lyrics.Web.Data;
 using Ratio_Lyrics.Web.DependencyInjection;
-using Ratio_Lyrics.Web.Services.Implements;
+using Ratio_Lyrics.Web.Entities;
 using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -26,6 +28,10 @@ builder.Services.AddControllers();
 
 builder.AddSerilogConfig();
 builder.Services.AddRatioLyricsDBContext(builder.Configuration);
+builder.Services.AddIdentity<RatioLyricUsers, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<RatioLyricsDBContext>()
+    .AddDefaultUI()
+    .AddDefaultTokenProviders();
 builder.Services.AddJwtConfiguration(builder.Configuration);
 builder.Services.AddFluentValidationConfig();
 builder.Services.AddConfigurationAutoMapper();
