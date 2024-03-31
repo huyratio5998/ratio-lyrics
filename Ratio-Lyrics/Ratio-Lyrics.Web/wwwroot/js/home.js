@@ -311,14 +311,15 @@ const SaveSongContributeEvent = () => {
   const contributeForm = document.querySelector("#js_contribute-song-form");
   if (!btnContributeSong || !contributeForm) return;
 
-  const contributeFormData = new FormData(contributeForm);
   const errorMessageEl = document.querySelector(
     ".js_contributeSong-error-message"
   );
-  btnContributeSong.addEventListener("click", (e) => {
+  btnContributeSong.addEventListener("click", async (e) => {
     e.preventDefault();
 
-    if (!contributeFormData.get("Name") || !contributeFormData.get("Lyrics")) {
+    const songName = document.querySelector(".js_ratio-name");
+    const songLyrics = tinymce.get("contribute-textarea");
+    if (!songName.value || !songLyrics.getContent()) {
       DisplayMessageInMoment(
         errorMessageEl,
         `Name or Lyrics can not be empty!`,
@@ -328,6 +329,7 @@ const SaveSongContributeEvent = () => {
       return;
     }
 
+    await grecaptcha.execute();
     contributeForm.submit();
   });
 };

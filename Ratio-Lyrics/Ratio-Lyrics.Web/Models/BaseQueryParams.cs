@@ -6,7 +6,7 @@ namespace Ratio_Lyrics.Web.Models
     public class BaseQueryParams
     {
         public string? SearchText { get; set; } = string.Empty;
-        public OrderType? OrderBy { get; set; } = OrderType.Asc;
+        public OrderType? OrderBy { get; set; } = OrderType.Desc;
         [BindProperty(Name ="page")]
         public int PageNumber { get; set; }
         public int PageSize { get; set; }        

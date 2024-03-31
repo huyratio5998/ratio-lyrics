@@ -76,6 +76,15 @@ namespace Ratio_Lyrics.Web.Services.Implements
             return new LoginResponseViewModel { Status = "Failure", Message = $"External authentication by {info.LoginProvider} failure!" };
         }
 
+        public async Task<List<string>?> GetCurrentUserRoles(ClaimsPrincipal currentUser)
+        {
+            var userId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var user = await _userService.Get(userId);
+            if (user == null) return null;
+
+            return user.UserRoles;
+        }
+
         public async Task<bool> UserLogout()
         {
             try

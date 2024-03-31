@@ -251,7 +251,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             var result = _commonService.VerifyPassword(request.Password, userInfo.PasswordHash, Convert.FromHexString(userInfo.HashSalt));
             if (!result) return new LoginResponseViewModel { Status = Constants.CommonConstant.Failure };
 
-            await _signInManager.SignInAsync(userInfo, isPersistent: false);
+            await _signInManager.SignInAsync(userInfo, isPersistent: request.RememberMe);
             return new LoginResponseViewModel
             {
                 UserName = request.UserName,

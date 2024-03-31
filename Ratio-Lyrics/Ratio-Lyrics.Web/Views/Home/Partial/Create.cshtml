@@ -68,7 +68,7 @@
                     <div class="row">
                         <div class="form-group">
                             <label asp-for="SongModel.Lyric" class="control-label">Lyrics*</label>
-                            <textarea asp-for="SongModel.Lyric" class="form-control"></textarea>
+                            <textarea asp-for="SongModel.Lyric" id="contribute-textarea" class="js_ratio-lyrics form-control"></textarea>
                             <span asp-validation-for="SongModel.Lyric" class="text-danger"></span>
                         </div>
                         <input type="hidden" asp-for="SongModel.ContributedBy" value="@Model.SongModel.ContributedBy" />
@@ -87,7 +87,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     @if (Model.CaptchaSettings.IsVersion3())
                     {
-                        <button class="btn btn-primary g-recaptcha" disabled type="submit"
+                        <button class="btn btn-primary g-recaptcha js_btn-save-song-contribution" disabled type="submit"
                                 data-action="@Model.CaptchaSettings.Action" data-sitekey="@Model.CaptchaSettings.SiteKey" data-callback="onSubmit">
                             Save
                         </button>
