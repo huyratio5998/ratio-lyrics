@@ -82,6 +82,8 @@
             <textarea asp-for="Lyric" class="form-control"></textarea>
             <span asp-validation-for="Lyric" class="text-danger"></span>
         </div>
+       
+        <input type="hidden" asp-for="ContributedBy" />
         <input type="hidden" asp-for="MediaLinksForm" value="@JsonSerializer.Serialize(Model.MediaPlatformLinks)" />
         <div class="form-group col-md-4">
             <input type="submit" value="Create" class="btn btn-primary" />

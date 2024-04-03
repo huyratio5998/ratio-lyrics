@@ -17,6 +17,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
         private readonly IArtistService _artistService;
         private readonly IMediaPlatformService _mediaPlatformService;
         private readonly ICacheService _cacheService;        
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMapper _mapper;
@@ -146,7 +147,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 Lyric = newSong.Lyric,
                 Views = 0,
                 SongId = newSong.Id,
-                ContributedBy = string.Empty
+                ContributedBy = newSong.ContributedBy ?? string.Empty
             });
             _logger.LogInformation($"Save song lyrics");
         }

@@ -59,7 +59,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             users = users.Skip((args.PageIndex - 1) * args.PageSize).Take(args.PageSize);
 
             var results = new List<UserViewModel>();
-            foreach (var item in users)
+            foreach (var item in users.ToList())
             {
                 var user = _mapper.Map<UserViewModel>(item);
                 user.UserRoles = (await _userManager.GetRolesAsync(item)).ToList();

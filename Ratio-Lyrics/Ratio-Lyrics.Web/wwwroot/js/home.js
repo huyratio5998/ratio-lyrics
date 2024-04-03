@@ -319,11 +319,14 @@ const SaveSongContributeEvent = () => {
 
     const songName = document.querySelector(".js_ratio-name");
     const songLyrics = tinymce.get("contribute-textarea");
+    console.log("songName: " + songName.value);
+    console.log("songLyrics: " + songLyrics.getContent());
     if (!songName.value || !songLyrics.getContent()) {
-      DisplayMessageInMoment(
+      console.log("go inside");
+      DisplayMessageInMomentWithClasses(
         errorMessageEl,
         `Name or Lyrics can not be empty!`,
-        "alert-danger",
+        ["mt-3", "col-md-5", "alert", "alert-danger"],
         5000
       );
       return;

@@ -54,3 +54,19 @@ const DisplayMessageInMoment = (element, message, className, timeOut) => {
     if (className) element.classList.remove(className);
   }, timeOut);
 };
+
+const DisplayMessageInMomentWithClasses = (
+  element,
+  message,
+  classNames,
+  timeOut
+) => {
+  if (!element) return;
+
+  element.innerHTML = message;
+  if (classNames) element.classList.add(...classNames);
+  setTimeout(() => {
+    element.innerHTML = "";
+    if (classNames) element.classList.remove(...classNames);
+  }, timeOut);
+};

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Ratio_Lyrics.Web.Areas.Admin.Models.User;
 using Ratio_Lyrics.Web.Entities;
 using Ratio_Lyrics.Web.Models;
 using Ratio_Lyrics.Web.Models.Enums;
@@ -76,13 +77,26 @@ namespace Ratio_Lyrics.Web.Services.Implements
             return new LoginResponseViewModel { Status = "Failure", Message = $"External authentication by {info.LoginProvider} failure!" };
         }
 
-        public async Task<List<string>?> GetCurrentUserRoles(ClaimsPrincipal currentUser)
+        public async Task<List<string>?> GetCurrentUserRoles(ClaimsPrincipal? currentUser)
         {
+            if(currentUser == null) return null;
+
             var userId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var user = await _userService.Get(userId);
             if (user == null) return null;
 
             return user.UserRoles;
+        }
+
+        public async Task<UserViewModel?> GetCurrentUser(ClaimsPrincipal? currentUser)
+        {
+            if(currentUser == null) return null;
+
+            var userId = currentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var user = await _userService.Get(userId);
+            if (user == null) return null;
+
+            return user;
         }
 
         public async Task<bool> UserLogout()

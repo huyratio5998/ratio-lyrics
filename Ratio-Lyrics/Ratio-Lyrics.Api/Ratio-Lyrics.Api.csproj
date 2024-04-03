@@ -21,4 +21,8 @@
     <ProjectReference Include="..\Ratio-Lyrics.Web\Ratio-Lyrics.Web.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
+  </ItemGroup>
+
 </Project>
