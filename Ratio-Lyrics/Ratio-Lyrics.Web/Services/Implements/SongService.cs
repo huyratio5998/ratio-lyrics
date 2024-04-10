@@ -17,6 +17,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
         private readonly IArtistService _artistService;
         private readonly IMediaPlatformService _mediaPlatformService;
         private readonly ICacheService _cacheService;        
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMapper _mapper;
@@ -146,7 +147,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
                 Lyric = newSong.Lyric,
                 Views = 0,
                 SongId = newSong.Id,
-                ContributedBy = string.Empty
+                ContributedBy = newSong.ContributedBy ?? string.Empty
             });
             _logger.LogInformation($"Save song lyrics");
         }
@@ -529,50 +530,39 @@ namespace Ratio_Lyrics.Web.Services.Implements
         {
             if (string.IsNullOrWhiteSpace(newSong.Name) || string.IsNullOrWhiteSpace(newSong.Lyric)) return string.Empty;
 
-            string nameFormated = StringHelper.RemoveSign4VietnameseString(newSong.Name);
-            string nameNoSpace = newSong.Name.Replace(" ", "");
+            string nameFormated = StringHelper.RemoveSign4VietnameseString(newSong.Name);            
             string nameFormatedNoSpace = nameFormated.Replace(" ", "");
             var listKeywords = new List<string>();
             listKeywords.Add(nameFormated);
-            listKeywords.Add(newSong.Name);
-            listKeywords.Add(nameNoSpace);
+            listKeywords.Add(newSong.Name);            
             listKeywords.Add(nameFormatedNoSpace);
             if (!string.IsNullOrWhiteSpace(newSong.ArtistForm))
             {
                 var artists = newSong.ArtistForm.Split(',');
                 foreach (var artist in artists)
                 {
-                    var artistNoAccent = StringHelper.RemoveSign4VietnameseString(artist);
-                    var artistNoSpace = artist.Replace(" ", "");
+                    var artistNoAccent = StringHelper.RemoveSign4VietnameseString(artist);                    
                     var artistNoAccentNoSpace = artistNoAccent.Replace(" ", "");
                     listKeywords.Add(artist);
-                    listKeywords.Add(artistNoAccent);
-                    listKeywords.Add(artistNoSpace);
+                    listKeywords.Add(artistNoAccent);                    
                     listKeywords.Add(artistNoAccentNoSpace);
                     listKeywords.Add($"{newSong.Name} {artist}");
-                    listKeywords.Add($"{newSong.Name} {artistNoAccent}");
-                    listKeywords.Add($"{newSong.Name} {artistNoSpace}");
+                    listKeywords.Add($"{newSong.Name} {artistNoAccent}");                    
                     listKeywords.Add($"{newSong.Name} {artistNoAccentNoSpace}");
 
                     listKeywords.Add($"{nameFormated} {artist}");
-                    listKeywords.Add($"{nameFormated} {artistNoAccent}");
-                    listKeywords.Add($"{nameFormated} {artistNoSpace}");
-                    listKeywords.Add($"{nameFormated} {artistNoAccentNoSpace}");
-
-                    listKeywords.Add($"{nameNoSpace} {artist}");
-                    listKeywords.Add($"{nameNoSpace} {artistNoAccent}");
-                    listKeywords.Add($"{nameNoSpace} {artistNoSpace}");
-                    listKeywords.Add($"{nameNoSpace} {artistNoAccentNoSpace}");
+                    listKeywords.Add($"{nameFormated} {artistNoAccent}");                    
+                    listKeywords.Add($"{nameFormated} {artistNoAccentNoSpace}");                    
 
                     listKeywords.Add($"{nameFormated} {artist}");
-                    listKeywords.Add($"{nameFormated} {artistNoAccent}");
-                    listKeywords.Add($"{nameFormated} {artistNoSpace}");
+                    listKeywords.Add($"{nameFormated} {artistNoAccent}");                    
                     listKeywords.Add($"{nameFormated} {artistNoAccentNoSpace}");
                 }
             }
 
             var results = string.Join(", ", listKeywords.Distinct());
 
+            if (results.Length > 450) results = results.Substring(0, 450);
             return results;
         }
     }

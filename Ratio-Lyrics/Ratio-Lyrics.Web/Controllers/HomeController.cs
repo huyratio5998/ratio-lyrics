@@ -12,13 +12,14 @@ namespace Ratio_Lyrics.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ISongService _songService;
+        private readonly IAuthenticationService _authenticationService;
         private readonly IMediaPlatformService _mediaPlatformService;
         private readonly IMapper _mapper;
         private readonly GoogleCaptchaOptions _googleCaptchaOptions;
         private readonly ICaptchaService _captchaService;
         private readonly IConfiguration _configuration;
 
-        public HomeController(ILogger<HomeController> logger, ISongService songService, IMediaPlatformService mediaPlatformService, IMapper mapper, IOptions<GoogleCaptchaOptions> googleCaptchaOptions, ICaptchaService captchaService, IConfiguration configuration)
+        public HomeController(ILogger<HomeController> logger, ISongService songService, IMediaPlatformService mediaPlatformService, IMapper mapper, IOptions<GoogleCaptchaOptions> googleCaptchaOptions, ICaptchaService captchaService, IConfiguration configuration, IAuthenticationService authenticationService)
         {
             _logger = logger;
             _songService = songService;
@@ -27,6 +28,7 @@ namespace Ratio_Lyrics.Web.Controllers
             _googleCaptchaOptions = googleCaptchaOptions.Value;
             _captchaService = captchaService;
             _configuration = configuration;
+            _authenticationService = authenticationService;
         }
 
         [HttpGet]
@@ -126,7 +128,11 @@ namespace Ratio_Lyrics.Web.Controllers
             if (!recaptchaValidation) return RedirectToAction(nameof(Index));
 
             var newSong = homeViewModel.SongModel;
-            newSong.SearchKey = _songService.BuildSearchKey(newSong);
+            newSong.SearchKey = _songService.BuildSearchKey(newSong);            
+                        
+            var currentUser = await _authenticationService.GetCurrentUser(User);
+            newSong.ContributedBy = currentUser?.DisplayName ?? User?.Identity?.Name;
+
             var result = await _songService.CreateSongAsync(newSong);
             if (result <= 0) return RedirectToAction(nameof(Index));
 

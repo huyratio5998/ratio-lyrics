@@ -15,12 +15,14 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
         private readonly IMapper _mapper;
         private readonly ISongService _songService;
         private readonly IMediaPlatformService _mediaPlatformService;        
+        private readonly IAuthenticationService _authenticationService;
 
-        public SongController(IMapper mapper, ISongService songService,IMediaPlatformService mediaPlatformService)
+        public SongController(IMapper mapper, ISongService songService, IMediaPlatformService mediaPlatformService, IAuthenticationService authenticationService)
         {
             _mapper = mapper;
             _songService = songService;
             _mediaPlatformService = mediaPlatformService;
+            _authenticationService = authenticationService;
         }
 
         [HttpPost]
@@ -59,10 +61,13 @@ namespace Ratio_Lyrics.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Create()
         {
-            var medias = await Task.Run(() => _mediaPlatformService.GetMediaPlatformsAsync());           
+            var medias = await Task.Run(() => _mediaPlatformService.GetMediaPlatformsAsync());
+            var currentUser = await _authenticationService.GetCurrentUser(User);
+            
             var model = new SongViewModel
             {
                 MediaPlatformLinks = _mapper.Map<List<SongMediaPlatformViewModel>>(medias),                
+                ContributedBy = currentUser?.DisplayName ?? User?.Identity?.Name
             };
 
             return View(model);

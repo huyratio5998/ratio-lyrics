@@ -59,7 +59,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             users = users.Skip((args.PageIndex - 1) * args.PageSize).Take(args.PageSize);
 
             var results = new List<UserViewModel>();
-            foreach (var item in users)
+            foreach (var item in users.ToList())
             {
                 var user = _mapper.Map<UserViewModel>(item);
                 user.UserRoles = (await _userManager.GetRolesAsync(item)).ToList();
@@ -251,7 +251,7 @@ namespace Ratio_Lyrics.Web.Services.Implements
             var result = _commonService.VerifyPassword(request.Password, userInfo.PasswordHash, Convert.FromHexString(userInfo.HashSalt));
             if (!result) return new LoginResponseViewModel { Status = Constants.CommonConstant.Failure };
 
-            await _signInManager.SignInAsync(userInfo, isPersistent: false);
+            await _signInManager.SignInAsync(userInfo, isPersistent: request.RememberMe);
             return new LoginResponseViewModel
             {
                 UserName = request.UserName,

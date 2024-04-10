@@ -108,30 +108,7 @@ else
 
     @if (Model.CaptchaSettings.IsVersion3())
     {
-        <script src="https://www.google.com/recaptcha/api.js?render=@Model.CaptchaSettings.SiteKey"></script>
-        <script>
-            function onSubmit(token) {
-                const contributeForm = document.querySelector("#js_contribute-song-form");
-                const contributeFormData = new FormData(contributeForm);
-                const errorMessageEl = document.querySelector(
-                    ".js_contributeSong-error-message"
-                );
-                if (
-                    !contributeFormData.get("Name") ||
-                    !contributeFormData.get("Lyrics")
-                ) {
-                    DisplayMessageInMoment(
-                        errorMessageEl,
-                        "Name or Lyrics can not be empty!",
-                        "alert-danger",
-                        5000
-                    );
-                    return;
-                }
-
-                document.getElementById("js_contribute-song-form").submit();
-            }
-        </script>
+        <script src="https://www.google.com/recaptcha/api.js?render=@Model.CaptchaSettings.SiteKey"></script>        
     }
 }
 
