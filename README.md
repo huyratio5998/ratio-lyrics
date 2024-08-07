@@ -8,10 +8,10 @@
 
 <b>Public web </b>
 </br>
-3. Could contribute song:
+2. Could contribute song:
 ![image](https://github.com/user-attachments/assets/0e5373e6-fe1d-48cc-baf3-6cfbbffbee59)
 ![image](https://github.com/user-attachments/assets/dccbb3cf-93e4-4961-870b-36d3cce0220d)
-4. Search song:
+3. Search song:
 ![image](https://github.com/user-attachments/assets/4b02b7b7-3f87-4ed6-b163-146febabcf32)
-5. Detail:
+4. Detail:
 ![image](https://github.com/user-attachments/assets/a3d520ea-5fc0-4ad2-b8e9-b7444714e4e8)
